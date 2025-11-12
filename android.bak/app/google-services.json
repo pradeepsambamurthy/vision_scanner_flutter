@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "324880859336",
+    "project_id": "vision-screener",
+    "storage_bucket": "vision-screener.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:324880859336:android:ce6c40da6ddb13708b65fd",
+        "android_client_info": {
+          "package_name": "com.example.eyesight_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "324880859336-12penkcnop47g8fe14mroa4rt3moqep9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.eyesight_flutter",
+            "certificate_hash": "caaa45ce653ec709650c7e559936d7e3612f67cb"
+          }
+        },
+        {
+          "client_id": "324880859336-lqp0vs9kcbcbk5814bto4mlinqn2o6jl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBcpGwunaFERVa90zu_T58_NckTNbU6ruU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "324880859336-lqp0vs9kcbcbk5814bto4mlinqn2o6jl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "324880859336-02no2ucr7v44jqctf7n7agsdo393i1mv.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.eyesightFlutter"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
