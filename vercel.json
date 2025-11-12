@@ -1,8 +1,14 @@
 {
   "version": 2,
   "routes": [
+    {
+      "src": "/(.*)\\.(js|css|png|jpg|jpeg|gif|svg|webp|ico|json|wasm|html|map)$",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ],
+      "continue": true
+    },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
-
 
