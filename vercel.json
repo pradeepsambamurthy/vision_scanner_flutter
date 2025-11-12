@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "vercel_build.sh", "use": "@vercel/static-build", "config": { "distDir": "build/web" } }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).(js|css|png|jpg|jpeg|gif|svg|webp|ico|json|wasm)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    }
+  ]
+}
