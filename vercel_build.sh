@@ -1,20 +1,22 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-# Cache dir between builds
-export FLUTTER_HOME="$HOME/flutter"
+# Pin a known-good Flutter version for consistent CI builds
+FLUTTER_VERSION=${FLUTTER_VERSION:-3.24.3}
+FLUTTER_HOME="$HOME/flutter-$FLUTTER_VERSION"
+
 if [ ! -d "$FLUTTER_HOME" ]; then
-  git clone https://github.com/flutter/flutter.git -b stable "$FLUTTER_HOME"
+  git clone https://github.com/flutter/flutter.git -b "$FLUTTER_VERSION" "$FLUTTER_HOME"
 fi
+
 export PATH="$FLUTTER_HOME/bin:$PATH"
 
-# Warm up toolchain
-flutter --version
+echo "Using Flutter $(flutter --version)"
 flutter config --enable-web
 
-# Fetch deps and build
+# Dependencies & build
 flutter pub get
-flutter build web --release --web-renderer auto
+# NOTE: do NOT pass --web-renderer; some toolchains in CI don't recognize it
+flutter build web --release
 
-# Vercel expects the output dir to exist after build
 echo "Build complete -> build/web"
