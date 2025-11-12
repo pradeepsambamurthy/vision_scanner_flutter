@@ -21,7 +21,10 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        return android;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for android - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
@@ -56,8 +59,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '324880859336',
     projectId: 'vision-screener',
     storageBucket: 'vision-screener.firebasestorage.app',
-    androidClientId: '324880859336-12penkcnop47g8fe14mroa4rt3moqep9.apps.googleusercontent.com',
-    iosClientId: '324880859336-02no2ucr7v44jqctf7n7agsdo393i1mv.apps.googleusercontent.com',
     iosBundleId: 'com.example.eyesightFlutter',
   );
 
@@ -67,8 +68,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '324880859336',
     projectId: 'vision-screener',
     storageBucket: 'vision-screener.firebasestorage.app',
-    androidClientId: '324880859336-12penkcnop47g8fe14mroa4rt3moqep9.apps.googleusercontent.com',
-    iosClientId: '324880859336-02no2ucr7v44jqctf7n7agsdo393i1mv.apps.googleusercontent.com',
     iosBundleId: 'com.example.eyesightFlutter',
   );
 
@@ -80,14 +79,6 @@ class DefaultFirebaseOptions {
     authDomain: 'vision-screener.firebaseapp.com',
     storageBucket: 'vision-screener.firebasestorage.app',
     measurementId: 'G-8GPHCL98VD',
-  );
-
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBcpGwunaFERVa90zu_T58_NckTNbU6ruU',
-    appId: '1:324880859336:android:ce6c40da6ddb13708b65fd',
-    messagingSenderId: '324880859336',
-    projectId: 'vision-screener',
-    storageBucket: 'vision-screener.firebasestorage.app',
   );
 
 }

@@ -1,30 +1,34 @@
+import org.gradle.api.tasks.compile.JavaCompile
+
+buildscript {
+    repositories { google(); mavenCentral() }
+}
 
 plugins {
-    id("com.android.application") version "8.7.2" apply false
-    id("org.jetbrains.kotlin.android") version "2.1.0" apply false
-    id("com.google.gms.google-services") version "4.4.2" apply false
+    id("com.android.application") apply false
+    id("org.jetbrains.kotlin.android") apply false
 }
+
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
+    repositories { google(); mavenCentral() }
 }
 
-val newBuildDir: Directory =
-    rootProject.layout.buildDirectory
-        .dir("../../build")
-        .get()
-rootProject.layout.buildDirectory.value(newBuildDir)
-
+// Keep Flutter's conventional build dir layout
+rootProject.buildDir = file("../build")
 subprojects {
-    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
-    project.layout.buildDirectory.value(newSubprojectBuildDir)
-}
-subprojects {
+    project.buildDir = file("${rootProject.buildDir}/${project.name}")
     project.evaluationDependsOn(":app")
 }
 
+// ⬇️ add this suppression block here
+subprojects {
+    tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.addAll(
+            listOf("-Xlint:-unchecked", "-Xlint:-deprecation", "-Xlint:-options")
+        )
+    }
+}
+
 tasks.register<Delete>("clean") {
-    delete(rootProject.layout.buildDirectory)
+    delete(rootProject.buildDir)
 }

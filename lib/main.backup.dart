@@ -45,14 +45,14 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
     try {
       // IMPORTANT: paths must include "assets/"
       _interpreter = await tfl.Interpreter.fromAsset(
-        'assets/model/dr_mobilenetv2_fp16.tflite',
-      );
+          'assets/model/dr_mobilenetv2_fp16.tflite');
       // Some builds auto-allocate; this is safe either way
       _interpreter!.allocateTensors();
 
-      _labels = (await rootBundle.loadString(
-        'assets/model/labels.txt',
-      )).trim().split('\n');
+      _labels = (await rootBundle
+              .loadString('assets/model/labels.txt'))
+          .trim()
+          .split('\n');
       setState(() => _result = 'Model ready');
     } catch (e) {
       setState(() => _result = 'Model load error: $e');
@@ -60,11 +60,8 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
   }
 
   Future<void> _pick(ImageSource src) async {
-    final picked = await ImagePicker().pickImage(
-      source: src,
-      maxWidth: 2048,
-      maxHeight: 2048,
-    );
+    final picked = await ImagePicker()
+        .pickImage(source: src, maxWidth: 2048, maxHeight: 2048);
     if (picked == null) return;
     final bytes = await picked.readAsBytes();
     setState(() {
@@ -80,11 +77,8 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
     if (decoded == null) {
       throw Exception('Decode failed');
     }
-    final resized = img.copyResize(
-      decoded,
-      width: inputSize,
-      height: inputSize,
-    );
+    final resized =
+        img.copyResize(decoded, width: inputSize, height: inputSize);
 
     // Get raw bytes in RGB order
     final rgbBytes = resized.getBytes(order: img.ChannelOrder.rgb);
@@ -95,12 +89,15 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
       1,
       (_) => List.generate(
         inputSize,
-        (y) => List.generate(inputSize, (x) {
-          final r = rgbBytes[idx++] / 255.0;
-          final g = rgbBytes[idx++] / 255.0;
-          final b = rgbBytes[idx++] / 255.0;
-          return [r, g, b];
-        }),
+        (y) => List.generate(
+          inputSize,
+          (x) {
+            final r = rgbBytes[idx++] / 255.0;
+            final g = rgbBytes[idx++] / 255.0;
+            final b = rgbBytes[idx++] / 255.0;
+            return [r, g, b];
+          },
+        ),
       ),
     );
     return batch;
@@ -123,8 +120,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
 
       // Extract probabilities
       final probs = List<double>.from(
-        (output[0] as List).map((e) => (e as num).toDouble()),
-      );
+          (output[0] as List).map((e) => (e as num).toDouble()));
 
       // Argmax
       int best = 0;
@@ -135,15 +131,14 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
           bestP = probs[i];
         }
       }
-      final label = (best >= 0 && best < _labels.length)
-          ? _labels[best]
-          : 'Class $best';
+      final label =
+          (best >= 0 && best < _labels.length) ? _labels[best] : 'Class $best';
 
       final details = List.generate(
-        probs.length,
-        (i) =>
-            '${i < _labels.length ? _labels[i] : "C$i"}: ${(probs[i] * 100).toStringAsFixed(1)}%',
-      ).join('   ');
+              probs.length,
+              (i) =>
+                  '${i < _labels.length ? _labels[i] : "C$i"}: ${(probs[i] * 100).toStringAsFixed(1)}%')
+          .join('   ');
 
       setState(() {
         _result = '$label  (${(bestP * 100).toStringAsFixed(1)}%)\n$details';
@@ -166,9 +161,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
           children: [
             Expanded(
               child: _imgBytes == null
-                  ? const Center(
-                      child: Text('Pick or capture a retinal photo.'),
-                    )
+                  ? const Center(child: Text('Pick or capture a retinal photo.'))
                   : Image.memory(_imgBytes!, fit: BoxFit.contain),
             ),
             const SizedBox(height: 12),
@@ -176,10 +169,8 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
               Text(
                 _result!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
             const SizedBox(height: 12),
             Wrap(

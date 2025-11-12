@@ -1,0 +1,2 @@
+/Users/kamakshiilapavuluri/flutter_apps/eyesight_flutter/android/app/.cxx/debug/2n234s3q/x86_64/CMakeFiles/edit_cache.dir
+/Users/kamakshiilapavuluri/flutter_apps/eyesight_flutter/android/app/.cxx/debug/2n234s3q/x86_64/CMakeFiles/rebuild_cache.dir

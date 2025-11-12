@@ -2,12 +2,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+
 import 'screens/app_shell.dart';
 import 'screens/capture_screen.dart';
-import 'screens/acuity_test_screen.dart';
-
-// NOTE: Do NOT import 'report_screen.dart' here — the Report UI is shown inside AppShell’s Report tab
-// NOTE: We also don’t need to import login_screen.dart here (it’s used inside AppShell’s overlay)
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,17 +49,24 @@ class VisionApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'EyeSight',
       theme: theme,
-      // keep these non-const unless constructors are const
-      home: AppShell(),
+      home: const AppShell(), // Tabs live here (Test tab includes the gate)
       routes: {
-        '/start': (_) => CaptureScreen(),
-        '/test': (_) => AcuityTestScreen(),
-        '/app': (_) => AppShell(),
+        '/start': (_) =>
+            const CaptureScreen(), // profile form screen (also saves gender)
+        '/app': (_) => const AppShell(),
       },
+      // Use onGenerateRoute to jump to specific tabs
       onGenerateRoute: (settings) {
         if (settings.name == '/report') {
           return MaterialPageRoute<void>(
             builder: (_) => AppShell(initialTab: AppSection.report),
+            settings: settings,
+          );
+        }
+        if (settings.name == '/test') {
+          return MaterialPageRoute<void>(
+            builder: (_) => AppShell(initialTab: AppSection.test),
+            settings: settings,
           );
         }
         return null;

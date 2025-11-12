@@ -1,32 +1,50 @@
-// lib/services/compliance_service_stub.dart
-// Safe no-op compliance checker for web/desktop builds.
-// This avoids pulling in ML Kit or dart:io so your Chrome build stays happy.
-
+import 'dart:io';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import '../models/vision_models.dart';
-
-// Provide a dummy File type so the method signature matches the mobile version
-// without importing dart:io (which isn't available on web).
-typedef File = Object;
 
 class ComplianceService {
   ComplianceService._();
-  static final ComplianceService instance = ComplianceService._();
+  static final instance = ComplianceService._();
 
-  /// No-op on web/desktop.
-  Future<void> init() async {}
+  final _options = FaceDetectorOptions(
+    enableTracking: false,
+    enableContours: true,
+    enableClassification: true,
+    performanceMode: FaceDetectorMode.fast,
+  );
+  FaceDetector? _detector;
 
-  /// Returns a permissive, always-OK result so the UI flow continues smoothly
-  /// when running on platforms where we don't do camera/ML checks.
+  Future<void> init() async {
+    _detector ??= FaceDetector(options: _options);
+  }
+
   Future<ComplianceFlags?> analyzeFrame(
     File image,
     EyeSide testingSide, {
     required double targetDistanceCm,
   }) async {
+    await init();
+    final input = InputImage.fromFile(image);
+    final faces = await _detector!.processImage(input);
+    if (faces.isEmpty) return null;
+    final f = faces.first;
+
+    // crude occlusion heuristic: if eye contour points are low-contrast / missing → "covered"
+    final rightEye = f.contours[FaceContourType.rightEye];
+    final leftEye = f.contours[FaceContourType.leftEye];
+    final rightCovered = rightEye?.points.isEmpty ?? true;
+    final leftCovered = leftEye?.points.isEmpty ?? true;
+
+    final goodLight =
+        true; // plug luma proxy from calibration if you capture frames
+    final distanceLocked =
+        true; // later: compare face size vs baseline to detect drift
+
     return ComplianceFlags(
-      goodLighting: true,
-      distanceLocked: true,
-      rightEyeCovered: false,
-      leftEyeCovered: false,
+      goodLighting: goodLight,
+      distanceLocked: distanceLocked,
+      rightEyeCovered: rightCovered,
+      leftEyeCovered: leftCovered,
     );
   }
 }

@@ -1,0 +1,46 @@
+// android/app/build.gradle  (Groovy, new Flutter plugin style)
+
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'dev.flutter.flutter-gradle-plugin'   // <-- replaces the old "apply from: flutter.gradle"
+}
+
+android {
+    namespace 'com.example.eyesight_flutter'   // change to your package if different
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.example.eyesight_flutter'
+        minSdkVersion flutter.minSdkVersion
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            // Use debug signing for now. Replace with your keystore when you’re ready.
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    // Java/Kotlin 17 for AGP 8.x
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+// Points Flutter tooling at your module
+flutter {
+    source '../..'
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+}
