@@ -584,10 +584,10 @@ class _HomeContent extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Feature cards
-            Wrap(
+            const Wrap(
               spacing: 12,
               runSpacing: 12,
-              children: const [
+              children: [
                 _TwoTestsCard(),
                 _InfoCard(
                   icon: Icons.rule,
@@ -606,9 +606,9 @@ class _HomeContent extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            _Section(
+            const _Section(
               title: 'What you’ll need',
-              children: const [
+              children: [
                 _Bullet('A quiet, well-lit spot with minimal glare.'),
                 _Bullet('A phone, tablet, or laptop with this app open.'),
                 _Bullet(
@@ -620,9 +620,9 @@ class _HomeContent extends StatelessWidget {
               ],
             ),
 
-            _Section(
+            const _Section(
               title: 'How it works',
-              children: const [
+              children: [
                 _Bullet(
                   'Choose Distance (~3 m / 10 ft) or Near (~40 cm / 16″).',
                 ),
@@ -639,9 +639,9 @@ class _HomeContent extends StatelessWidget {
               ],
             ),
 
-            _Section(
+            const _Section(
               title: 'Tips for accurate results',
-              children: const [
+              children: [
                 _Bullet(
                   'Keep the required distance steady; avoid screen glare.',
                 ),
@@ -653,9 +653,9 @@ class _HomeContent extends StatelessWidget {
               ],
             ),
 
-            _Section(
+            const _Section(
               title: 'FAQ',
-              children: const [
+              children: [
                 _FaqItem(
                   q: 'Is this a diagnosis?',
                   a: 'No. This is a screening. If you have symptoms or concerns, see an eye-care professional.',
@@ -837,9 +837,9 @@ class _DisclaimerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Glass(
-      padding: const EdgeInsets.all(12),
-      child: const Text(
+    return const Glass(
+      padding: EdgeInsets.all(12),
+      child: Text(
         'Disclaimer: Screening only — not a diagnosis. If you have symptoms, eye strain, or concerns about your vision, please consult an eye-care professional.',
         style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
       ),
@@ -1193,8 +1193,8 @@ class _AboutContent extends StatelessWidget {
                 'Build provider partnerships to bridge screening and professional care.',
               ),
             ]),
-            Glass(
-              child: const Padding(
+            const Glass(
+              child: Padding(
                 padding: EdgeInsets.all(16),
                 child: Text(
                   '✨ We’re building more than an app — we’re building a future where eye health is accessible, proactive, and preventive.',
@@ -1215,7 +1215,7 @@ class _AboutContent extends StatelessWidget {
 
 // ================== TEST + REPORT TABS ==================
 class TestContent extends StatelessWidget {
-  const TestContent({required this.onRequestLogin});
+  const TestContent({super.key, required this.onRequestLogin});
   final VoidCallback onRequestLogin;
 
   @override
@@ -1269,10 +1269,10 @@ class TestContent extends StatelessWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1100),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
+        child: const Padding(
+          padding: EdgeInsets.all(8.0),
           child: Glass(
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.all(8.0),
               child: AcuityTestScreen(),
             ),
@@ -1293,10 +1293,10 @@ class _ReportTab extends StatelessWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1100),
-        child: Padding(
-          padding: const EdgeInsets.all(8),
+        child: const Padding(
+          padding: EdgeInsets.all(8),
           child: Glass(
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.all(12),
               child: ReportBody(),
             ),

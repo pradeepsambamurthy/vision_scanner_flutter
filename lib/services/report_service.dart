@@ -281,14 +281,16 @@ class ReportService {
     }
 
     if (consult) return 'Consult an eye doctor for a detailed exam.';
-    if (anisometropia)
+    if (anisometropia) {
       return 'Consider a professional eye exam (difference between eyes).';
+    }
     return 'Your eyes appear healthy with good vision.';
   }
 
   _AgeInfo _ageClassAndThreshold(int? age) {
-    if (age == null)
+    if (age == null) {
       return const _AgeInfo('Adult (18–59)', 0.20); // default if unknown
+    }
     if (age <= 5) return const _AgeInfo('Under 6 (not supported)', 0.20);
     if (age <= 12) return const _AgeInfo('Child (6–12)', 0.18); // ~20/30
     if (age <= 17) return const _AgeInfo('Teen (13–17)', 0.20); // ~20/32
@@ -319,10 +321,12 @@ class ReportService {
 
     // Distance only
     if (worstNear == null && worstDistance != null) {
-      if (worstDistance >= myopiaCut)
+      if (worstDistance >= myopiaCut) {
         return 'Likely short-sight (myopia) — distance vision reduced.';
-      if (a >= 45)
+      }
+      if (a >= 45) {
         return 'Distance is OK. If near reading is hard, age-related long-sight (presbyopia) is common.';
+      }
       return 'No strong refractive pattern from distance screening alone.';
     }
 
@@ -340,21 +344,24 @@ class ReportService {
     final distBad = (worstDistance ?? 0) > okCut;
     final nearBad = (worstNear ?? 0) > okCut;
 
-    if (distBad && !nearBad)
+    if (distBad && !nearBad) {
       return 'Likely short-sight (myopia) — distance vision reduced.';
+    }
     if (!distBad && nearBad) {
       return a >= 40
           ? 'Likely presbyopia (age-related near focus).'
           : 'Possible long-sight (hyperopia) — near vision reduced.';
     }
-    if (distBad && nearBad)
+    if (distBad && nearBad) {
       return 'Reduced vision at both distances — please get a full exam.';
+    }
     return 'Within expected range.';
   }
 
   double? _maxOrNull(double a, double b) {
-    if (a == double.negativeInfinity && b == double.negativeInfinity)
+    if (a == double.negativeInfinity && b == double.negativeInfinity) {
       return null;
+    }
     return a > b ? a : b;
   }
 

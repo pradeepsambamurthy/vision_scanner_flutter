@@ -106,7 +106,7 @@ class MLService {
 
     // Placeholder decode: replace with your model’s output schema
     final gender = (probs.isNotEmpty && probs.first > 0.5) ? 'female' : 'male';
-    final age = 30; // TODO: compute from model outputs if supported
+    const age = 30; // TODO: compute from model outputs if supported
     return {'age': age, 'gender': gender, 'raw': probs};
   }
 

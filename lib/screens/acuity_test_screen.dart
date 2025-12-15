@@ -226,7 +226,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: DropdownButtonFormField<vm.TestMode>(
-                          value: _mode,
+                          initialValue: _mode,
                           decoration: const InputDecoration(
                             isDense: true,
                             border: OutlineInputBorder(),

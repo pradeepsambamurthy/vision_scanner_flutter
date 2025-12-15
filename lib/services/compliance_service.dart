@@ -35,9 +35,9 @@ class ComplianceService {
     final rightCovered = rightEye?.points.isEmpty ?? true;
     final leftCovered = leftEye?.points.isEmpty ?? true;
 
-    final goodLight =
+    const goodLight =
         true; // plug luma proxy from calibration if you capture frames
-    final distanceLocked =
+    const distanceLocked =
         true; // later: compare face size vs baseline to detect drift
 
     return ComplianceFlags(

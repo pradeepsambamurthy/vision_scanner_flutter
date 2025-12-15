@@ -59,13 +59,13 @@ class VisionApp extends StatelessWidget {
       onGenerateRoute: (settings) {
         if (settings.name == '/report') {
           return MaterialPageRoute<void>(
-            builder: (_) => AppShell(initialTab: AppSection.report),
+            builder: (_) => const AppShell(initialTab: AppSection.report),
             settings: settings,
           );
         }
         if (settings.name == '/test') {
           return MaterialPageRoute<void>(
-            builder: (_) => AppShell(initialTab: AppSection.test),
+            builder: (_) => const AppShell(initialTab: AppSection.test),
             settings: settings,
           );
         }

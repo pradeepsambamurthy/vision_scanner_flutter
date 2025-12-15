@@ -141,7 +141,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _gender,
+              initialValue: _gender,
               items: const [
                 DropdownMenuItem(value: 'Male', child: Text('Male')),
                 DropdownMenuItem(value: 'Female', child: Text('Female')),
