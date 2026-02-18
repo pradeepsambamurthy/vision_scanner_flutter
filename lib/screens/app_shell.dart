@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 // Screens / widgets
 import 'acuity_test_screen.dart';
 import 'report_screen.dart'; // must export ReportBody (content-only)
+import 'color_blindness_screen.dart';
 
-enum AppSection { home, howto, about, test, report }
+enum AppSection { home, howto, about, test, color, report }
 
 // ================== Brand ==================
 class _Brand {
@@ -121,6 +122,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                 labelStyle: const TextStyle(fontWeight: FontWeight.w700),
                 tabs: const [
                   Tab(icon: Icon(Icons.home_outlined, size: 18), text: 'Home'),
+
                   Tab(
                     icon: Icon(Icons.menu_book_outlined, size: 18),
                     text: 'How to Use',
@@ -130,6 +132,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                     icon: Icon(Icons.visibility_outlined, size: 18),
                     text: 'Test',
                   ),
+                  Tab(icon: Icon(Icons.palette_outlined), text: 'Color'),
                   Tab(
                     icon: Icon(Icons.description_outlined, size: 18),
                     text: 'Report',
@@ -207,6 +210,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                 _HowToContent(onGoTest: () => _tab.animateTo(3)),
                 const _AboutContent(),
                 const TestContent(),
+                const ColorBlindnessScreen(),
                 const _ReportTab(),
               ],
             ),
