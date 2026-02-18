@@ -1,8 +1,7 @@
 // lib/screens/capture_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/report_service.dart';
 
 class CaptureScreen extends StatefulWidget {
@@ -23,37 +22,17 @@ class _CaptureScreenState extends State<CaptureScreen> {
   @override
   void initState() {
     super.initState();
-    _loadExistingProfile();
+    _loadLocalProfile();
   }
 
-  Future<void> _loadExistingProfile() async {
+  Future<void> _loadLocalProfile() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        // Prefill from Auth displayName
-        if ((user.displayName ?? '').trim().isNotEmpty) {
-          _nameCtrl.text = user.displayName!.trim();
-        }
-        // Prefill from Firestore if present
-        final doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        if (doc.exists) {
-          final data = doc.data()!;
-          if ((data['name'] ?? '').toString().trim().isNotEmpty) {
-            _nameCtrl.text = data['name'].toString().trim();
-          }
-          if (data['age'] != null) {
-            _ageCtrl.text = data['age'].toString();
-          }
-          if ((data['gender'] ?? '').toString().isNotEmpty) {
-            _gender = data['gender'].toString();
-          }
-        }
-      }
+      final prefs = await SharedPreferences.getInstance();
+      _nameCtrl.text = prefs.getString('profile_name') ?? '';
+      _ageCtrl.text = prefs.getString('profile_age') ?? '';
+      _gender = prefs.getString('profile_gender');
     } catch (_) {
-      // ignore prefilling errors
+      // ignore
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -71,30 +50,24 @@ class _CaptureScreenState extends State<CaptureScreen> {
     final age = int.tryParse(_ageCtrl.text.trim());
     final gender = _gender;
 
-    // Save to report service (used by your PDF/report)
+    // Save to report service (used by PDF/report)
     ReportService.instance.setDemographics(
       name: name.isEmpty ? null : name,
       age: age,
       gender: gender,
     );
 
-    // Persist to Firestore for next time (if signed in)
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'name': name.isEmpty ? null : name,
-        'age': age,
-        'gender': gender,
-        'updatedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-      // keep Auth displayName in sync (optional)
-      if (name.isNotEmpty && name != (user.displayName ?? '')) {
-        await user.updateDisplayName(name);
-      }
+    // Save locally (no login)
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_name', name);
+    await prefs.setString('profile_age', _ageCtrl.text.trim());
+    if (gender == null) {
+      await prefs.remove('profile_gender');
+    } else {
+      await prefs.setString('profile_gender', gender);
     }
 
     if (!mounted) return;
-    // IMPORTANT: go to /test (the _TestGate will enforce that gender is set)
     Navigator.pushNamed(context, '/test');
   }
 
@@ -155,8 +128,6 @@ class _CaptureScreenState extends State<CaptureScreen> {
                 border: OutlineInputBorder(),
               ),
               onChanged: (val) => setState(() => _gender = val),
-              // To make gender REQUIRED, uncomment:
-              // validator: (v) => (v == null || v.isEmpty) ? 'Please select gender' : null,
             ),
             const SizedBox(height: 20),
             FilledButton.icon(
@@ -166,11 +137,6 @@ class _CaptureScreenState extends State<CaptureScreen> {
               },
               icon: const Icon(Icons.play_arrow),
               label: const Text('Save & Start Test'),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Tip: You can wear your usual glasses if you normally use them.',
-              style: TextStyle(color: Colors.black54),
             ),
           ],
         ),

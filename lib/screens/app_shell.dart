@@ -1,12 +1,10 @@
 // lib/screens/app_shell.dart
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 // Screens / widgets
 import 'acuity_test_screen.dart';
 import 'report_screen.dart'; // must export ReportBody (content-only)
-import 'login_screen.dart'; // must export LoginFormEmbedded
 
 enum AppSection { home, howto, about, test, report }
 
@@ -52,29 +50,11 @@ Widget heroBanner(BuildContext context) {
 class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   late final TabController _tab;
 
-  bool _showLogin = false; // inline overlay visibility
-  int? _pendingTabAfterLogin; // where to go after successful login
-
   @override
   void initState() {
     super.initState();
     _tab = TabController(length: 5, vsync: this);
     if (widget.initialTab != null) _tab.index = widget.initialTab!.index;
-
-    // Close login overlay and continue to requested tab after sign in
-    FirebaseAuth.instance.authStateChanges().listen((user) {
-      if (!mounted) return;
-      if (user != null && _showLogin) {
-        setState(() => _showLogin = false);
-        if (_pendingTabAfterLogin != null) {
-          _tab.animateTo(_pendingTabAfterLogin!);
-          _pendingTabAfterLogin = null;
-        }
-      } else {
-        // Refresh header account state
-        setState(() {});
-      }
-    });
   }
 
   @override
@@ -83,17 +63,8 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _openLoginInline({int? goToTabAfter}) {
-    setState(() {
-      _pendingTabAfterLogin = goToTabAfter;
-      _showLogin = true;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
       // ================== HEADER ==================
       appBar: AppBar(
@@ -115,60 +86,14 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
         foregroundColor: Colors.white,
         titleSpacing: 12,
         title: const _BrandTitle(), // <-- pill sits here
-        actions: [
-          if (FirebaseAuth.instance.currentUser == null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: TextButton.icon(
-                style: TextButton.styleFrom(foregroundColor: Colors.white),
-                onPressed: () => _openLoginInline(),
-                icon: const Icon(Icons.login),
-                label: const Text('Sign in'),
-              ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: PopupMenuButton<String>(
-                tooltip: FirebaseAuth.instance.currentUser!.email ?? 'Account',
-                icon: const Icon(Icons.account_circle, color: Colors.white),
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'email',
-                    enabled: false,
-                    child: Text(
-                      FirebaseAuth.instance.currentUser!.email ?? 'Signed in',
-                    ),
-                  ),
-                  const PopupMenuDivider(),
-                  const PopupMenuItem(
-                    value: 'signout',
-                    child: ListTile(
-                      dense: true,
-                      leading: Icon(Icons.logout),
-                      title: Text('Sign out'),
-                    ),
-                  ),
-                ],
-                onSelected: (v) async {
-                  if (v == 'signout') {
-                    await FirebaseAuth.instance.signOut();
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(const SnackBar(content: Text('Signed out')));
-                    _tab.animateTo(0);
-                  }
-                },
-              ),
-            ),
-        ],
+        actions: const [],
+
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(64),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
             child: Container(
-              height: 48,
+              height: 56,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(24),
@@ -176,14 +101,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
               ),
               child: TabBar(
                 controller: _tab,
-                onTap: (i) {
-                  if (i == 3 && FirebaseAuth.instance.currentUser == null) {
-                    _openLoginInline(goToTabAfter: 3);
-                    _tab.animateTo(_tab.index);
-                  } else {
-                    _tab.animateTo(i);
-                  }
-                },
+                onTap: (i) => _tab.animateTo(i),
                 dividerColor: Colors.transparent,
                 indicator: BoxDecoration(
                   color: Colors.white.withOpacity(0.18),
@@ -202,11 +120,20 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                 unselectedLabelColor: Colors.white.withOpacity(0.90),
                 labelStyle: const TextStyle(fontWeight: FontWeight.w700),
                 tabs: const [
-                  Tab(icon: Icon(Icons.home_outlined), text: 'Home'),
-                  Tab(icon: Icon(Icons.menu_book_outlined), text: 'How to Use'),
-                  Tab(icon: Icon(Icons.info_outline), text: 'About'),
-                  Tab(icon: Icon(Icons.visibility_outlined), text: 'Test'),
-                  Tab(icon: Icon(Icons.description_outlined), text: 'Report'),
+                  Tab(icon: Icon(Icons.home_outlined, size: 18), text: 'Home'),
+                  Tab(
+                    icon: Icon(Icons.menu_book_outlined, size: 18),
+                    text: 'How to Use',
+                  ),
+                  Tab(icon: Icon(Icons.info_outline, size: 18), text: 'About'),
+                  Tab(
+                    icon: Icon(Icons.visibility_outlined, size: 18),
+                    text: 'Test',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.description_outlined, size: 18),
+                    text: 'Report',
+                  ),
                 ],
               ),
             ),
@@ -274,107 +201,16 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
           Positioned.fill(
             child: TabBarView(
               controller: _tab,
-              physics: FirebaseAuth.instance.currentUser == null
-                  ? const NeverScrollableScrollPhysics()
-                  : null,
+              physics: null,
               children: [
-                _HomeContent(
-                  onStartTest: () {
-                    if (FirebaseAuth.instance.currentUser == null) {
-                      _openLoginInline(goToTabAfter: 3);
-                    } else {
-                      _tab.animateTo(3);
-                    }
-                  },
-                ),
-                _HowToContent(
-                  onGoTest: () {
-                    if (FirebaseAuth.instance.currentUser == null) {
-                      _openLoginInline(goToTabAfter: 3);
-                    } else {
-                      _tab.animateTo(3);
-                    }
-                  },
-                ),
+                _HomeContent(onStartTest: () => _tab.animateTo(3)),
+                _HowToContent(onGoTest: () => _tab.animateTo(3)),
                 const _AboutContent(),
-                TestContent(
-                  onRequestLogin: () => _openLoginInline(goToTabAfter: 3),
-                ),
+                const TestContent(),
                 const _ReportTab(),
               ],
             ),
           ),
-
-          // 4) Login overlay under header
-          if (_showLogin) ...[
-            Positioned.fill(
-              child: GestureDetector(
-                onTap: () => setState(() => _showLogin = false),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                  child: Container(color: Colors.black.withOpacity(0.20)),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 560),
-                  child: Material(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    elevation: 6,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Row(
-                            children: [
-                              const Expanded(
-                                child: Text(
-                                  'Sign in / Sign up',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                tooltip: 'Close',
-                                onPressed: () =>
-                                    setState(() => _showLogin = false),
-                                icon: const Icon(Icons.close),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          const Divider(height: 1),
-                          const SizedBox(height: 16),
-                          LoginFormEmbedded(
-                            onSuccess: () {
-                              setState(() => _showLogin = false);
-                              if (_pendingTabAfterLogin != null) {
-                                _tab.animateTo(_pendingTabAfterLogin!);
-                                _pendingTabAfterLogin = null;
-                              }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Signed in successfully'),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
 
@@ -1215,57 +1051,10 @@ class _AboutContent extends StatelessWidget {
 
 // ================== TEST + REPORT TABS ==================
 class TestContent extends StatelessWidget {
-  const TestContent({super.key, required this.onRequestLogin});
-  final VoidCallback onRequestLogin;
+  const TestContent({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
-    // Not signed in → block access and show a sign-in card
-    if (user == null) {
-      return Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Glass(
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Sign in required',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 20,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Please sign in to run the vision test.',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  FilledButton.icon(
-                    onPressed: onRequestLogin,
-                    icon: const Icon(Icons.login),
-                    label: const Text('Sign in / Sign up'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    // Signed in → show the real test UI
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1100),
@@ -1296,10 +1085,7 @@ class _ReportTab extends StatelessWidget {
         child: const Padding(
           padding: EdgeInsets.all(8),
           child: Glass(
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: ReportBody(),
-            ),
+            child: Padding(padding: EdgeInsets.all(12), child: ReportBody()),
           ),
         ),
       ),
