@@ -1,0 +1,74 @@
+[
+  {
+    "id": "p01",
+    "assetPath": "assets/ishihara/p01.png",
+    "type": "control",
+    "expected_normal": "12"
+  },
+  {
+    "id": "p02",
+    "assetPath": "assets/ishihara/p02.png",
+    "type": "control",
+    "expected_normal": "8"
+  },
+  {
+    "id": "p03",
+    "assetPath": "assets/ishihara/p03.png",
+    "type": "red_green",
+    "expected_normal": "6"
+  },
+  {
+    "id": "p04",
+    "assetPath": "assets/ishihara/p04.png",
+    "type": "red_green",
+    "expected_normal": "5"
+  },
+  {
+    "id": "p05",
+    "assetPath": "assets/ishihara/p05.png",
+    "type": "red_green",
+    "expected_normal": "74"
+  },
+  {
+    "id": "p06",
+    "assetPath": "assets/ishihara/p06.png",
+    "type": "red_green",
+    "expected_normal": "45"
+  },
+  {
+    "id": "p07",
+    "assetPath": "assets/ishihara/p07.png",
+    "type": "blue_yellow",
+    "expected_normal": "29"
+  },
+  {
+    "id": "p08",
+    "assetPath": "assets/ishihara/p08.png",
+    "type": "blue_yellow",
+    "expected_normal": "17"
+  },
+  {
+    "id": "p09",
+    "assetPath": "assets/ishihara/p09.png",
+    "type": "blue_yellow",
+    "expected_normal": "52"
+  },
+  {
+    "id": "p10",
+    "assetPath": "assets/ishihara/p10.png",
+    "type": "blue_yellow",
+    "expected_normal": "7"
+  },
+  {
+    "id": "p11",
+    "assetPath": "assets/ishihara/p11.png",
+    "type": "blank_control",
+    "expected_normal": "Nothing"
+  },
+  {
+    "id": "p12",
+    "assetPath": "assets/ishihara/p12.png",
+    "type": "blank_control",
+    "expected_normal": "Nothing"
+  }
+]

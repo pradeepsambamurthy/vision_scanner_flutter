@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class ColorBlindnessScreen extends StatefulWidget {
@@ -8,356 +8,298 @@ class ColorBlindnessScreen extends StatefulWidget {
   State<ColorBlindnessScreen> createState() => _ColorBlindnessScreenState();
 }
 
-class _ColorBlindnessScreenState extends State<ColorBlindnessScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tab;
+class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
+  final List<String> plates = List.generate(
+    12,
+    (i) => 'assets/ishihara/p${(i + 1).toString().padLeft(2, '0')}.png',
+  );
 
-  @override
-  void initState() {
-    super.initState();
-    _tab = TabController(length: 3, vsync: this);
-  }
+  int index = 0;
+  final TextEditingController _answer = TextEditingController();
 
   @override
   void dispose() {
-    _tab.dispose();
+    _answer.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Color Blindness Screening',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Screening only — not a diagnosis. For best results, use maximum brightness and avoid night-mode / blue-light filters.',
-          style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 12),
+  String get currentPlate => plates[index];
 
-        Container(
-          height: 44,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.04),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.black.withOpacity(0.08)),
-          ),
-          child: TabBar(
-            controller: _tab,
-            indicatorSize: TabBarIndicatorSize.tab,
-            dividerColor: Colors.transparent,
-            indicator: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: Colors.black.withOpacity(0.08),
+  void onCheckPressed() {
+    final ans = _answer.text.trim();
+
+    // ✅ Don’t allow next if empty
+    if (ans.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a number or type "Nothing".'),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      if (index < plates.length - 1) {
+        index++;
+        _answer.clear();
+      } else {
+        // ✅ TODO: show final report dialog here
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Color Screening Result'),
+            content: const Text(
+              'Screening only — not a diagnosis.\n\n'
+              'If you had difficulty seeing multiple plates, consider an eye exam with an optometrist or ophthalmologist.',
             ),
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.black54,
-            tabs: const [
-              Tab(text: 'Ishihara'),
-              Tab(text: 'Red/Green'),
-              Tab(text: 'Blue/Yellow'),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 12),
-
-        Expanded(
-          child: TabBarView(
-            controller: _tab,
-            children: const [
-              _IshiharaSimple(),
-              _AdjustToMatch(
-                title: 'Red/Green Match',
-                mode: _MatchMode.redGreen,
-              ),
-              _AdjustToMatch(
-                title: 'Blue/Yellow Match',
-                mode: _MatchMode.blueYellow,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
               ),
             ],
           ),
+        );
+      }
+    });
+  }
+
+  void onShowHintPressed() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Hint'),
+        content: const Text(
+          'Look for the number formed by dots with slightly different color/brightness.',
         ),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
     );
   }
-}
 
-/// -------------------------
-/// 1) Simple Ishihara-like plate (generated dots)
-/// -------------------------
-class _IshiharaSimple extends StatefulWidget {
-  const _IshiharaSimple();
-
-  @override
-  State<_IshiharaSimple> createState() => _IshiharaSimpleState();
-}
-
-class _IshiharaSimpleState extends State<_IshiharaSimple> {
-  final _answerCtrl = TextEditingController();
-  bool _showHint = false;
-
-  @override
-  void dispose() {
-    _answerCtrl.dispose();
-    super.dispose();
+  // ---------- UI helpers ----------
+  Widget _glassModal({required Widget child}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.10),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white.withOpacity(0.18)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.30),
+                blurRadius: 22,
+                offset: const Offset(0, 14),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        AspectRatio(
-          aspectRatio: 1,
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: CustomPaint(
-                painter: _DotPlatePainter(),
-                child: const SizedBox.expand(),
-              ),
+  Widget _whiteCard({required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      padding: const EdgeInsets.all(18),
+      child: child,
+    );
+  }
+
+  Widget _instructionsDropdown() {
+    return Card(
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+          collapsedIconColor: Colors.black87,
+          iconColor: Colors.black87,
+          title: const Text(
+            'Instructions (tap to expand)',
+            style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.w800,
+              fontSize: 15,
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          'Question: What number do you see?',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _answerCtrl,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'Enter number (e.g., 12)',
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            FilledButton(
-              onPressed: () {
-                final v = _answerCtrl.text.trim();
-                // This generated plate encodes "12"
-                final ok = v == '12';
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      ok
-                          ? 'Looks good ✅'
-                          : 'Not matching. If you see nothing / different number, it may indicate color-vision deficiency.',
-                    ),
-                  ),
-                );
-              },
-              child: const Text('Check'),
-            ),
-            const SizedBox(width: 10),
-            TextButton(
-              onPressed: () => setState(() => _showHint = !_showHint),
-              child: Text(_showHint ? 'Hide hint' : 'Show hint'),
-            ),
-          ],
-        ),
-        if (_showHint)
-          const Padding(
-            padding: EdgeInsets.only(top: 6),
-            child: Text(
-              'Hint: The intended number is 12 (screening demo). For clinical-quality Ishihara, use validated plates.',
+          children: const [
+            Text(
+              'Screening only — not a diagnosis.\n\n'
+              'Display setup:\n'
+              '• Brightness 80–100%\n'
+              '• Disable Night Mode / True Tone / blue-light filters\n'
+              '• Avoid glare/reflections\n\n'
+              'Distance + timing:\n'
+              '• Sit 30–50 cm (12–20 in) from the screen\n'
+              '• View each plate for 3–5 seconds only\n'
+              '• Answer the FIRST number you see\n\n'
+              'Glasses / contacts:\n'
+              '• If you wear prescription glasses daily → keep them ON\n'
+              '• If you wear contact lenses → keep them ON\n'
+              '• If you have separate reading vs distance glasses → use what you normally use at this screen distance\n'
+              '• Remove sunglasses and tinted/blue-light glasses\n',
               style: TextStyle(
-                color: Colors.black54,
+                color: Colors.black87,
+                height: 1.35,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
-          ),
-      ],
-    );
-  }
-}
-
-class _DotPlatePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rnd = math.Random(12);
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.shortestSide * 0.48;
-
-    // Dots background colors (Ishihara-ish palette)
-    Color bg1() => const Color(0xFFB96D4A); // warm brown
-    Color bg2() => const Color(0xFF9C5E3F);
-    Color fg1() => const Color(0xFF58A85A); // green-ish
-    Color fg2() => const Color(0xFF4F9E59);
-
-    bool insideCircle(Offset p) => (p - center).distance <= radius;
-
-    // Define a rough "12" mask using normalized coordinates
-    bool inTwelveMask(Offset p) {
-      final dx = (p.dx - center.dx) / radius; // -1..1
-      final dy = (p.dy - center.dy) / radius; // -1..1
-
-      // "1" = thin vertical bar on left
-      final one = (dx > -0.55 && dx < -0.42 && dy > -0.55 && dy < 0.55);
-
-      // "2" = top curve + diagonal + bottom bar on right
-      final top = (dx > -0.05 && dx < 0.55 && dy > -0.55 && dy < -0.35);
-      final diag =
-          (dx + dy > 0.05 &&
-          dx + dy < 0.22 &&
-          dx > 0.05 &&
-          dy > -0.35 &&
-          dy < 0.25);
-      final bot = (dx > -0.05 && dx < 0.55 && dy > 0.35 && dy < 0.55);
-
-      return one || top || diag || bot;
-    }
-
-    // Draw lots of dots
-    final dotCount = 1800;
-    for (int i = 0; i < dotCount; i++) {
-      final r = radius * math.sqrt(rnd.nextDouble());
-      final t = rnd.nextDouble() * math.pi * 2;
-      final p = center + Offset(r * math.cos(t), r * math.sin(t));
-      if (!insideCircle(p)) continue;
-
-      final dotR = 2.0 + rnd.nextDouble() * 4.0;
-      final isFg = inTwelveMask(p);
-
-      final paint = Paint()
-        ..color = isFg
-            ? (rnd.nextBool() ? fg1() : fg2())
-            : (rnd.nextBool() ? bg1() : bg2());
-      canvas.drawCircle(p, dotR, paint);
-    }
-
-    // Soft border
-    final border = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = Colors.black.withOpacity(0.08);
-    canvas.drawCircle(center, radius, border);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// -------------------------
-/// 2) Slider-based “match” tests
-/// -------------------------
-enum _MatchMode { redGreen, blueYellow }
-
-class _AdjustToMatch extends StatefulWidget {
-  const _AdjustToMatch({required this.title, required this.mode});
-  final String title;
-  final _MatchMode mode;
-
-  @override
-  State<_AdjustToMatch> createState() => _AdjustToMatchState();
-}
-
-class _AdjustToMatchState extends State<_AdjustToMatch> {
-  double _value = 0.5;
-
-  @override
-  Widget build(BuildContext context) {
-    Color left;
-    Color right;
-
-    if (widget.mode == _MatchMode.redGreen) {
-      // left: fixed gray, right: red-green mix
-      left = const Color(0xFF9E9E9E);
-      final r = (255 * _value).round();
-      final g = (255 * (1 - _value)).round();
-      right = Color.fromARGB(255, r, g, 60);
-    } else {
-      // blue-yellow mix
-      left = const Color(0xFF9E9E9E);
-      final b = (255 * _value).round();
-      final y = (255 * (1 - _value)).round();
-      right = Color.fromARGB(255, y, y, b);
-    }
-
-    return ListView(
-      children: [
-        Text(
-          widget.title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Move the slider until the right square looks as close as possible to the left gray square.',
-          style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 12),
-
-        Row(
-          children: [
-            Expanded(
-              child: _Swatch(label: 'Reference', color: left),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _Swatch(label: 'Adjust', color: right),
-            ),
           ],
         ),
-
-        const SizedBox(height: 14),
-
-        Slider(value: _value, onChanged: (v) => setState(() => _value = v)),
-
-        const SizedBox(height: 6),
-
-        FilledButton(
-          onPressed: () {
-            // Simple heuristic: if user ends at extremes, might be struggling
-            final extreme = (_value < 0.12) || (_value > 0.88);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  extreme
-                      ? 'You ended near an extreme. If matching felt hard, consider a professional color vision test.'
-                      : 'Saved ✅ (Screening demo)',
-                ),
-              ),
-            );
-          },
-          child: const Text('Save'),
-        ),
-      ],
+      ),
     );
   }
-}
 
-class _Swatch extends StatelessWidget {
-  const _Swatch({required this.label, required this.color});
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _footerBar() {
+    return Row(
       children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-        const SizedBox(height: 6),
-        AspectRatio(
-          aspectRatio: 1.6,
-          child: Container(
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.black.withOpacity(0.10)),
+        Expanded(
+          child: FilledButton.icon(
+            onPressed: onCheckPressed,
+            icon: const Icon(Icons.check),
+            label: const Text('Check'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: FilledButton.icon(
+            onPressed: onShowHintPressed,
+            icon: const Icon(Icons.lightbulb_outline),
+            label: const Text('Show hint'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: _glassModal(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: _whiteCard(
+                child: LayoutBuilder(
+                  builder: (context, c) {
+                    // ✅ Reserve space for top + bottom so image always fits
+                    const double topBlock = 140; // title + dropdown area
+                    const double bottomBlock =
+                        170; // plate info + input + buttons
+                    final double available =
+                        (c.maxHeight - topBlock - bottomBlock).clamp(220, 520);
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title
+                        const Center(
+                          child: Text(
+                            'Color Vision Test — Ishihara',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 18,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Dropdown stays at top (doesn't force scroll)
+                        _instructionsDropdown(),
+                        const SizedBox(height: 10),
+
+                        // ✅ Image always visible (auto-sized)
+                        Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: SizedBox(
+                              width: available,
+                              height: available,
+                              child: Image.asset(
+                                currentPlate,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Plate counter
+                        Text(
+                          'Plate ${index + 1} of ${plates.length}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+
+                        // Question + input
+                        Text(
+                          'What number do you see? (Type "Nothing" if none)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black.withOpacity(0.85),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _answer,
+                          decoration: const InputDecoration(
+                            hintText: 'Example: 12  or  Nothing',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Buttons always visible
+                        _footerBar(),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

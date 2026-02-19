@@ -27,34 +27,13 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
-Widget heroBanner(BuildContext context) {
-  return Container(
-    height: 140, // adjust 120–180 to taste
-    width: double.infinity,
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(
-          'assets/peekvision_hero.jpg',
-          fit: BoxFit.cover,
-          alignment: Alignment.center,
-        ),
-        // Optional darken overlay for readability
-        // Container(color: Colors.black.withOpacity(0.25)),
-      ],
-    ),
-  );
-}
-
 class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   late final TabController _tab;
 
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 5, vsync: this);
+    _tab = TabController(length: 6, vsync: this);
     if (widget.initialTab != null) _tab.index = widget.initialTab!.index;
   }
 
@@ -63,6 +42,8 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
     _tab.dispose();
     super.dispose();
   }
+
+  void _go(int index) => _tab.animateTo(index);
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +67,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
         ),
         foregroundColor: Colors.white,
         titleSpacing: 12,
-        title: const _BrandTitle(), // <-- pill sits here
-        actions: const [],
-
+        title: const _BrandTitle(),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(64),
           child: Padding(
@@ -122,7 +101,6 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                 labelStyle: const TextStyle(fontWeight: FontWeight.w700),
                 tabs: const [
                   Tab(icon: Icon(Icons.home_outlined, size: 18), text: 'Home'),
-
                   Tab(
                     icon: Icon(Icons.menu_book_outlined, size: 18),
                     text: 'How to Use',
@@ -132,7 +110,10 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                     icon: Icon(Icons.visibility_outlined, size: 18),
                     text: 'Test',
                   ),
-                  Tab(icon: Icon(Icons.palette_outlined), text: 'Color'),
+                  Tab(
+                    icon: Icon(Icons.palette_outlined, size: 18),
+                    text: 'Color Vision',
+                  ),
                   Tab(
                     icon: Icon(Icons.description_outlined, size: 18),
                     text: 'Report',
@@ -147,7 +128,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
       // ================== BODY ==================
       body: Stack(
         children: [
-          // 1) Background image
+          // Background image
           Positioned.fill(
             child: Image.asset(
               'assets/images/eye_bg.png',
@@ -155,7 +136,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
               alignment: Alignment.center,
             ),
           ),
-          // 2) Soft wash for readability (blur + darker scrim + vignette)
+          // Readability wash
           Positioned.fill(
             child: Stack(
               children: [
@@ -200,14 +181,20 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
             ),
           ),
 
-          // 3) Pages
+          // Pages (MUST be exactly 6 children)
           Positioned.fill(
             child: TabBarView(
               controller: _tab,
-              physics: null,
+              physics: const NeverScrollableScrollPhysics(),
               children: [
-                _HomeContent(onStartTest: () => _tab.animateTo(3)),
-                _HowToContent(onGoTest: () => _tab.animateTo(3)),
+                _HomeContent(
+                  onStartVisionTest: () => _go(3),
+                  onStartColorVision: () => _go(4),
+                ),
+                _HowToContent(
+                  onGoVisionTest: () => _go(3),
+                  onGoColorVision: () => _go(4),
+                ),
                 const _AboutContent(),
                 const TestContent(),
                 const ColorBlindnessScreen(),
@@ -254,7 +241,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
           ),
         ),
       ),
-    ); // <-- close Scaffold
+    );
   }
 }
 
@@ -266,24 +253,14 @@ class _BrandTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final w = MediaQuery.of(context).size.width;
 
-    // Size of the pill in the header
-    final double bannerH = w >= 1200
-        ? 64
-        : w >= 900
-        ? 60
-        : 56;
-    final double bannerW = w >= 1200
-        ? 380
-        : w >= 900
-        ? 100
-        : 80;
+    final double bannerH = w >= 1200 ? 64 : (w >= 900 ? 60 : 56);
+    final double bannerW = w >= 1200 ? 380 : (w >= 900 ? 180 : 150);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          // keep the black translucent background + border/shadow
           decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.42),
             borderRadius: BorderRadius.circular(14),
@@ -296,16 +273,14 @@ class _BrandTitle extends StatelessWidget {
               ),
             ],
           ),
-          // the image fills the pill completely (no text/row next to it)
           child: SizedBox(
             width: bannerW,
             height: bannerH,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.asset(
-                // put the image you want to fill the pill
                 'assets/images/logo_peekvision.png',
-                fit: BoxFit.cover, // <— fill the pill area
+                fit: BoxFit.cover,
                 alignment: Alignment.center,
               ),
             ),
@@ -329,7 +304,7 @@ class Glass extends StatelessWidget {
   final Widget child;
   final EdgeInsets padding;
   final double borderRadius;
-  final double opacity; // background tint opacity
+  final double opacity;
   final double blur;
 
   @override
@@ -362,8 +337,13 @@ class Glass extends StatelessWidget {
 // HOME
 // ======================================================================
 class _HomeContent extends StatelessWidget {
-  const _HomeContent({required this.onStartTest});
-  final VoidCallback onStartTest;
+  const _HomeContent({
+    required this.onStartVisionTest,
+    required this.onStartColorVision,
+  });
+
+  final VoidCallback onStartVisionTest;
+  final VoidCallback onStartColorVision;
 
   @override
   Widget build(BuildContext context) {
@@ -395,8 +375,8 @@ class _HomeContent extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               'Screen your vision quickly — for both distance and near — just like a traditional eye chart. '
-              'The app can flag possible issues such as nearsightedness (myopia), farsightedness, or presbyopia, '
-              'and it highlights large differences between your eyes. Remember: this is a screening tool, not a medical diagnosis.',
+              'You can also do a Color Vision screening using Ishihara-style plates. '
+              'Remember: this is a screening tool, not a medical diagnosis.',
               style: text.titleMedium?.copyWith(
                 color: Colors.white.withOpacity(0.97),
                 fontWeight: FontWeight.w600,
@@ -404,36 +384,42 @@ class _HomeContent extends StatelessWidget {
                 height: 1.35,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Quick actions
-            Row(
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
               children: [
                 SizedBox(
-                  width: 240,
+                  width: 260,
                   child: FilledButton.icon(
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Start Test'),
-                    onPressed: onStartTest,
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: const Text('Start Vision Test'),
+                    onPressed: onStartVisionTest,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(
+                  width: 260,
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.palette_outlined),
+                    label: const Text('Start Color Vision'),
+                    onPressed: onStartColorVision,
+                  ),
+                ),
               ],
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Feature cards
             const Wrap(
               spacing: 12,
               runSpacing: 12,
               children: [
-                _TwoTestsCard(),
                 _InfoCard(
                   icon: Icons.rule,
-                  title: 'Age-aware guidance',
+                  title: 'Screening guidance',
                   body:
-                      'We compare your result with typical ranges for your age and explain it in plain language.',
+                      'We guide you step-by-step and save results in a simple report you can share.',
                 ),
                 _InfoCard(
                   icon: Icons.compare_arrows,
@@ -441,76 +427,11 @@ class _HomeContent extends StatelessWidget {
                   body:
                       'If one eye is much clearer than the other, we’ll flag it so you can follow up.',
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            const _Section(
-              title: 'What you’ll need',
-              children: [
-                _Bullet('A quiet, well-lit spot with minimal glare.'),
-                _Bullet('A phone, tablet, or laptop with this app open.'),
-                _Bullet(
-                  'A helper if possible — to hold the device and note answers.',
-                ),
-                _Bullet(
-                  'Wear your usual glasses/contacts if you normally use them.',
-                ),
-              ],
-            ),
-
-            const _Section(
-              title: 'How it works',
-              children: [
-                _Bullet(
-                  'Choose Distance (~3 m / 10 ft) or Near (~40 cm / 16″).',
-                ),
-                _Bullet(
-                  'Cover one eye (don’t press on it) and read 5 letters per line.',
-                ),
-                _Bullet(
-                  'Tap “I Can Read” to go smaller, or “I Can’t Read” to switch eyes.',
-                ),
-                _Bullet(
-                  'The app automatically tests both eyes and saves your results.',
-                ),
-                _Bullet('Find your shareable results under the Report tab.'),
-              ],
-            ),
-
-            const _Section(
-              title: 'Tips for accurate results',
-              children: [
-                _Bullet(
-                  'Keep the required distance steady; avoid screen glare.',
-                ),
-                _Bullet('Hold the device around eye level.'),
-                _Bullet('Use your usual correction if you wear it daily.'),
-                _Bullet(
-                  'If letters double or distort, consider a full eye exam.',
-                ),
-              ],
-            ),
-
-            const _Section(
-              title: 'FAQ',
-              children: [
-                _FaqItem(
-                  q: 'Is this a diagnosis?',
-                  a: 'No. This is a screening. If you have symptoms or concerns, see an eye-care professional.',
-                ),
-                _FaqItem(
-                  q: 'What is nearsightedness (myopia)?',
-                  a: 'Far objects look blurry while near objects are clearer. The Distance test (~3 m / 10 ft) helps screen for this.',
-                ),
-                _FaqItem(
-                  q: 'What is farsightedness (hyperopia/presbyopia)?',
-                  a: 'Far can be clear, but reading up close may be tiring or blurry. The Near test (~40 cm / 16″) helps screen for this.',
-                ),
-                _FaqItem(
-                  q: 'What does “20/20” mean?',
-                  a: 'At 20 feet, you can read what a typical person can read at 20 feet. 20/40 means letters must be twice as large; 20/16 is better than average.',
+                _InfoCard(
+                  icon: Icons.palette,
+                  title: 'Color Vision screening',
+                  body:
+                      'Ishihara-style plates help indicate possible red-green color vision deficiency.',
                 ),
               ],
             ),
@@ -570,108 +491,6 @@ class _InfoCard extends StatelessWidget {
   }
 }
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.children});
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Glass(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ...children,
-        ],
-      ),
-    );
-  }
-}
-
-class _Bullet extends StatelessWidget {
-  const _Bullet(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('•  ', style: TextStyle(color: Colors.white)),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.95),
-                fontWeight: FontWeight.w600,
-                fontSize: 20,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FaqItem extends StatelessWidget {
-  const _FaqItem({required this.q, required this.a});
-  final String q;
-  final String a;
-
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(dividerColor: Colors.white24),
-      child: ExpansionTile(
-        tilePadding: EdgeInsets.zero,
-        textColor: Colors.white,
-        collapsedTextColor: Colors.white,
-        iconColor: Colors.white,
-        collapsedIconColor: Colors.white70,
-        title: Text(
-          q,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                a,
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.95),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 20,
-                  height: 1.35,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _DisclaimerCard extends StatelessWidget {
   const _DisclaimerCard();
 
@@ -687,110 +506,19 @@ class _DisclaimerCard extends StatelessWidget {
   }
 }
 
-class _TwoTestsCard extends StatelessWidget {
-  const _TwoTestsCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final bodyColor = Colors.white.withOpacity(0.95);
-    const titleStyle = TextStyle(
-      color: Colors.white,
-      fontWeight: FontWeight.w600,
-      fontSize: 20,
-    );
-
-    TextSpan bulletLine({
-      required String lead,
-      required String mid,
-      required Color midColor,
-      required String tail,
-    }) {
-      return TextSpan(
-        children: [
-          const TextSpan(
-            text: '•  ',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
-          ),
-          TextSpan(
-            text: lead,
-            style: TextStyle(
-              color: bodyColor,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          TextSpan(
-            text: mid,
-            style: TextStyle(
-              color: midColor,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          TextSpan(
-            text: tail,
-            style: TextStyle(
-              color: bodyColor,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const TextSpan(text: '\n\n'),
-        ],
-      );
-    }
-
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: 260, maxWidth: 360),
-      child: Glass(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.remove_red_eye_outlined, color: Colors.white),
-            const SizedBox(height: 8),
-            const Text('Two test types', style: titleStyle),
-            const SizedBox(height: 6),
-            RichText(
-              text: TextSpan(
-                style: TextStyle(color: bodyColor, height: 1.35),
-                children: [
-                  bulletLine(
-                    lead: 'Distance test (≈3 m / 10 ft): screens for ',
-                    mid: 'nearsightedness',
-                    midColor: _Brand.teal,
-                    tail:
-                        ' (myopia). Near tasks (books/phone) are clearer; far objects (signs/boards) can be blurry.',
-                  ),
-                  bulletLine(
-                    lead: 'Near test (≈40 cm / 16″): screens for ',
-                    mid: 'farsightedness/reading difficulty',
-                    midColor: _Brand.purple,
-                    tail:
-                        ' (hyperopia/presbyopia). Far is often clear; reading up close can be tiring or blurry.',
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ======================================================================
 // HOW TO USE
 // ======================================================================
 class _HowToContent extends StatelessWidget {
-  const _HowToContent({required this.onGoTest});
-  final VoidCallback onGoTest;
+  const _HowToContent({
+    required this.onGoVisionTest,
+    required this.onGoColorVision,
+  });
 
-  Widget step({required int n, required String title, required String body}) {
+  final VoidCallback onGoVisionTest;
+  final VoidCallback onGoColorVision;
+
+  Widget _step({required int n, required String title, required String body}) {
     return Glass(
       child: ListTile(
         leading: CircleAvatar(
@@ -825,27 +553,6 @@ class _HowToContent extends StatelessWidget {
     );
   }
 
-  Widget bullet(String text) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('•  ', style: TextStyle(color: Colors.white)),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.95),
-              fontWeight: FontWeight.w600,
-              height: 1.35,
-              fontSize: 20,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -854,85 +561,65 @@ class _HowToContent extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: SizedBox(
-                width: 220,
-                child: FilledButton.icon(
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Go to Test'),
-                  onPressed: onGoTest,
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                SizedBox(
+                  width: 220,
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: const Text('Go to Vision Test'),
+                    onPressed: onGoVisionTest,
+                  ),
                 ),
-              ),
+                SizedBox(
+                  width: 240,
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.palette_outlined),
+                    label: const Text('Go to Color Vision'),
+                    onPressed: onGoColorVision,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
 
-            step(
+            _step(
               n: 1,
               title: 'Prepare the space',
               body:
                   'Choose a well-lit room, reduce glare, and keep the screen at roughly eye level.',
             ),
-            step(
+            _step(
               n: 2,
-              title: 'Pick a test',
+              title: 'Vision tests (Distance/Near)',
               body:
                   'Distance (~3 m / 10 ft) screens nearsightedness. Near (~40 cm / 16″) screens reading difficulty (hyperopia/presbyopia).',
             ),
-            step(
+            _step(
               n: 3,
-              title: 'Use a helper for Distance if possible',
-              body:
-                  'A helper can measure distance, hold the device steady, and record answers for better accuracy.',
-            ),
-            step(
-              n: 4,
-              title: 'Cover the opposite eye',
+              title: 'Cover the opposite eye (Vision)',
               body:
                   'Testing RIGHT eye → cover LEFT. Testing LEFT → cover RIGHT. Avoid pressing on the covered eye.',
             ),
-            step(
+            _step(
+              n: 4,
+              title: 'Color Vision screening (Ishihara)',
+              body:
+                  'Sit ~30–50 cm from the screen. View each plate for ~3–5 seconds and enter the first number you see (type “Nothing” if none).',
+            ),
+            _step(
               n: 5,
-              title: 'Read 5 letters per line',
+              title: 'Glasses / Contacts guidance',
               body:
-                  'Say the letters out loud. Tap “I Can Read” to go smaller; tap “I Can’t Read” to switch eyes or finish and generate your report.',
+                  'If you normally wear prescription glasses or contacts for daily vision, KEEP them on. Remove sunglasses and any tinted/blue-light filter glasses that change colors.',
             ),
-            step(
+            _step(
               n: 6,
-              title: 'View your results',
+              title: 'View your report',
               body:
-                  'When both eyes are done, your report is generated automatically and available on the Report tab.',
-            ),
-            const SizedBox(height: 10),
-
-            Glass(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Do & Don’t',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    bullet(
-                      'Do keep the distance consistent (3 m for Distance, 40 cm for Near).',
-                    ),
-                    bullet(
-                      'Do wear your usual glasses/contacts if you normally use them.',
-                    ),
-                    bullet('Don’t squint or lean forward while reading.'),
-                    bullet(
-                      'Stop if you feel eye strain or see double and consider a full exam.',
-                    ),
-                  ],
-                ),
-              ),
+                  'After you finish a test, results are saved and shown in the Report tab with next-step guidance.',
             ),
           ],
         ),
@@ -949,9 +636,9 @@ class _AboutContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final t = Theme.of(context).textTheme;
 
-    Widget section(String title, List<Widget> children) => Glass(
+    Widget section(String title, String body) => Glass(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -959,40 +646,24 @@ class _AboutContent extends StatelessWidget {
           children: [
             Text(
               title,
-              style: textTheme.headlineSmall?.copyWith(
+              style: t.titleLarge?.copyWith(
                 color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                fontSize: 22,
               ),
             ),
             const SizedBox(height: 10),
-            ...children,
-          ],
-        ),
-      ),
-    );
-
-    Widget bullet(String s) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '•  ',
-            style: TextStyle(color: Colors.white, fontSize: 20),
-          ),
-          Expanded(
-            child: Text(
-              s,
-              style: textTheme.bodyLarge?.copyWith(
+            Text(
+              body,
+              style: TextStyle(
                 color: Colors.white.withOpacity(0.95),
                 fontSize: 20,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
                 height: 1.35,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
 
@@ -1002,49 +673,19 @@ class _AboutContent extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(24),
           children: [
-            section("Our Approach", [
-              bullet(
-                'We focus on screening — simulating a step-by-step eye-chart experience, not just prescription renewal.',
-              ),
-              bullet(
-                'We present clear letter lines like a Snellen chart with simple, guided steps.',
-              ),
-              bullet(
-                'We keep the UI accessible with readable text, clear instructions, and helpful hints.',
-              ),
-              bullet(
-                'We generate understandable reports so users know what the result means.',
-              ),
-              bullet(
-                'Available on iOS, Android, and the web for broad access.',
-              ),
-            ]),
-            section("The Future", [
-              bullet(
-                'Add AI assistance to help pre-screen for common conditions (e.g., diabetic retinopathy, glaucoma).',
-              ),
-              bullet(
-                'Offer community screening features for schools, NGOs, and rural clinics.',
-              ),
-              bullet(
-                'Create a kid-friendly mode with gamified tasks to boost engagement.',
-              ),
-              bullet(
-                'Build provider partnerships to bridge screening and professional care.',
-              ),
-            ]),
-            const Glass(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Text(
-                  '✨ We’re building more than an app — we’re building a future where eye health is accessible, proactive, and preventive.',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+            section(
+              'What is PeekVision?',
+              'PeekVision is a simple vision screening app. It helps you do a quick check for Distance and Near vision (eye-chart style), and it includes a Color Vision screening using Ishihara-style plates.',
+            ),
+            const SizedBox(height: 12),
+            section(
+              'What it is (and is not)',
+              'PeekVision is for screening only — not a medical diagnosis. It can help you notice possible issues early and decide whether to see an eye-care professional.',
+            ),
+            const SizedBox(height: 12),
+            section(
+              'Why we built it',
+              'Many people delay eye exams. PeekVision makes it easy to do a quick self-check at home and keep a simple report over time.',
             ),
           ],
         ),
@@ -1077,7 +718,6 @@ class TestContent extends StatelessWidget {
 }
 
 // ================== REPORT TAB ==================
-// Uses ReportBody from report_screen.dart.
 class _ReportTab extends StatelessWidget {
   const _ReportTab();
 

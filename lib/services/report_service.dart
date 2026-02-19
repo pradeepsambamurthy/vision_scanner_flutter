@@ -56,6 +56,17 @@ class ReportData {
   String? ageAdjustedVerdict; // e.g., "Within normal range for age"
   String? refractiveHint; // e.g., "Likely short-sight (myopia)"
 
+  // ✅ NEW: Color Blindness (Ishihara) result storage
+  // Example:
+  // {
+  //   "total": 6,
+  //   "correct": 4,
+  //   "accuracy": 0.66,
+  //   "diagnosis": "Possible Mild Red-Green Deficiency",
+  //   "answers": {"p01":"12",...}
+  // }
+  Map<String, dynamic>? colorBlindness;
+
   // Convenience getters
   String get overallLabel => _worst?.snellen ?? '—';
   String get assessment =>
@@ -86,6 +97,9 @@ class ReportData {
     'ageGroup': ageGroupLabel,
     'ageVerdict': ageAdjustedVerdict,
     'refractiveHint': refractiveHint,
+
+    // ✅ NEW: include color blindness in saved report
+    'colorBlindness': colorBlindness,
   }..removeWhere((_, v) => v == null);
 }
 
@@ -135,6 +149,26 @@ class ReportService {
       gender: gender,
       wearingGlasses: glasses,
     );
+  }
+
+  // ---------------- ✅ NEW: Color Blindness ----------------
+
+  /// Stores Ishihara / color-vision screening results into the current report.
+  /// This matches the call you already made in color_blindness_screen.dart.
+  void setColorBlindnessResult({
+    required int total,
+    required int correct,
+    required double accuracy,
+    required String diagnosis,
+    required Map<String, String> answers,
+  }) {
+    current.colorBlindness = {
+      'total': total,
+      'correct': correct,
+      'accuracy': accuracy,
+      'diagnosis': diagnosis,
+      'answers': answers,
+    };
   }
 
   // ---------------- Acuity results + derived assessments ----------------
@@ -191,7 +225,9 @@ class ReportService {
       ..warning = null
       ..ageGroupLabel = null
       ..ageAdjustedVerdict = null
-      ..refractiveHint = null;
+      ..refractiveHint = null
+      // ✅ NEW: clear color blindness data too
+      ..colorBlindness = null;
   }
 
   // ---------------- Derived assessments ----------------

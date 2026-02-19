@@ -13,9 +13,16 @@ class ReportBody extends StatelessWidget {
 
     final hasDistance = data.distanceRight != null || data.distanceLeft != null;
     final hasNear = data.nearRight != null || data.nearLeft != null;
-    final hasAny = hasDistance || hasNear;
+    final hasVision = hasDistance || hasNear;
 
-    if (!hasAny) {
+    // ✅ NEW: Color blindness section support
+    // Expecting: data.colorBlindness is Map<String, dynamic>?
+    final cb = data.colorBlindness;
+    final hasColorBlindness = cb != null;
+
+    final hasAnyReport = hasVision || hasColorBlindness;
+
+    if (!hasAnyReport) {
       return const Text(
         'No report yet. Run a test to generate your report.',
         style: TextStyle(color: Colors.white),
@@ -74,6 +81,24 @@ class ReportBody extends StatelessWidget {
       ),
     );
 
+    // ✅ NEW helper: safe reads from cb map
+    String cbText(String key) {
+      if (cb == null) return '—';
+      final v = cb![key];
+      if (v == null) return '—';
+      return v.toString();
+    }
+
+    double cbAccuracy() {
+      if (cb == null) return 0.0;
+      final v = cb!['accuracy'];
+      if (v is num) return v.toDouble();
+      if (v is String) return double.tryParse(v) ?? 0.0;
+      return 0.0;
+    }
+
+    final cbAccPct = (cbAccuracy() * 100).toStringAsFixed(0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -110,6 +135,22 @@ class ReportBody extends StatelessWidget {
           block(
             'Near Acuity',
             row('Near', show(data.nearRight), show(data.nearLeft)),
+          ),
+
+        // ✅ NEW: Color blindness report section
+        if (hasColorBlindness)
+          block(
+            'Color Vision (Ishihara)',
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Diagnosis: ${cbText('diagnosis')}'),
+                const SizedBox(height: 6),
+                Text('Score: ${cbText('correct')} / ${cbText('total')}'),
+                const SizedBox(height: 6),
+                Text('Accuracy: $cbAccPct%'),
+              ],
+            ),
           ),
 
         // Guidance from ReportService

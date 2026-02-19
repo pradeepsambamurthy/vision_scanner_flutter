@@ -8,7 +8,7 @@ environment:
   flutter: '>=3.22.0'
 
 dependencies:
-  flutter:
+  flutter:     
     sdk: flutter
 
   # Core app deps
@@ -48,3 +48,4 @@ flutter:
     - assets/models/age_gender.tflite
     - assets/images/eye_bg.png
     - assets/images/logo_peekvision.png
+    - assets/ishihara/
