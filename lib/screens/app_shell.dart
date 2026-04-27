@@ -823,12 +823,6 @@ class _ContactTab extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             row(
-              icon: Icons.phone_outlined,
-              label: 'Phone',
-              value: '+1 7622171069',
-            ),
-            const SizedBox(height: 12),
-            row(
               icon: Icons.language_outlined,
               label: 'Website',
               value: 'https://peekvision.io',
