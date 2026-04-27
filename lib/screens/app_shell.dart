@@ -1,12 +1,12 @@
 // lib/screens/app_shell.dart
 import 'dart:ui';
-import 'package:flutter/material.dart';
 
-// Screens / widgets
-import 'acuity_test_screen.dart';
-import 'report_screen.dart'; // must export ReportBody (content-only)
-import 'color_blindness_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'acuity_test_screen.dart';
+import 'report_screen.dart';
+import 'color_blindness_screen.dart';
 
 enum AppSection { home, howto, about, color, test, report, contact }
 
