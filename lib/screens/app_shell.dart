@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'acuity_test_screen.dart';
 import 'report_screen.dart'; // must export ReportBody (content-only)
 import 'color_blindness_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum AppSection { home, howto, about, color, test, report, contact }
 
@@ -746,6 +747,18 @@ class _ReportTab extends StatelessWidget {
 class _ContactTab extends StatelessWidget {
   const _ContactTab();
 
+  Future<void> _openEmail() async {
+    final Uri emailUri = Uri.parse(
+      'mailto:pradeepkumar.sambamurthy@gmail.com'
+      '?subject=PeekVision%20Feedback'
+      '&body=Hello%20PeekVision%20Team,%0A%0A',
+    );
+
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
@@ -791,6 +804,51 @@ class _ContactTab extends StatelessWidget {
       );
     }
 
+    Widget emailRow() {
+      return Glass(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.email_outlined, color: _Brand.teal, size: 28),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Email',
+                    style: t.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      foregroundColor: _Brand.teal,
+                      alignment: Alignment.centerLeft,
+                    ),
+                    icon: const Icon(Icons.mail_outline),
+                    label: const Text(
+                      'pradeepkumar.sambamurthy@gmail.com',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                    onPressed: _openEmail,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 1000),
@@ -807,7 +865,7 @@ class _ContactTab extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Questions, feedback, support, partnerships, or collaboration inquiries.',
+              'For feedback, support, or questions about PeekVision, please contact us.',
               style: t.titleMedium?.copyWith(
                 color: Colors.white.withOpacity(0.95),
                 fontSize: 20,
@@ -816,11 +874,7 @@ class _ContactTab extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            row(
-              icon: Icons.email_outlined,
-              label: 'Email',
-              value: 'pradeepkumar.sambamurthy@gmail.com',
-            ),
+            emailRow(),
             const SizedBox(height: 12),
             row(
               icon: Icons.language_outlined,
