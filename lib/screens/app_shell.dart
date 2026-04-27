@@ -7,7 +7,7 @@ import 'acuity_test_screen.dart';
 import 'report_screen.dart'; // must export ReportBody (content-only)
 import 'color_blindness_screen.dart';
 
-enum AppSection { home, howto, about, test, color, report }
+enum AppSection { home, howto, about, color, test, report, contact }
 
 // ================== Brand ==================
 class _Brand {
@@ -33,7 +33,7 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 6, vsync: this);
+    _tab = TabController(length: 7, vsync: this);
     if (widget.initialTab != null) _tab.index = widget.initialTab!.index;
   }
 
@@ -107,16 +107,20 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
                   ),
                   Tab(icon: Icon(Icons.info_outline, size: 18), text: 'About'),
                   Tab(
-                    icon: Icon(Icons.visibility_outlined, size: 18),
-                    text: 'Test',
-                  ),
-                  Tab(
                     icon: Icon(Icons.palette_outlined, size: 18),
                     text: 'Color Vision',
                   ),
                   Tab(
+                    icon: Icon(Icons.visibility_outlined, size: 18),
+                    text: 'Test',
+                  ),
+                  Tab(
                     icon: Icon(Icons.description_outlined, size: 18),
                     text: 'Report',
+                  ),
+                  Tab(
+                    icon: Icon(Icons.contact_mail_outlined, size: 18),
+                    text: 'Contact',
                   ),
                 ],
               ),
@@ -181,24 +185,25 @@ class _AppShellState extends State<AppShell> with TickerProviderStateMixin {
             ),
           ),
 
-          // Pages (MUST be exactly 6 children)
+          // Pages (MUST be exactly 7 children)
           Positioned.fill(
             child: TabBarView(
               controller: _tab,
               physics: const NeverScrollableScrollPhysics(),
               children: [
                 _HomeContent(
-                  onStartVisionTest: () => _go(3),
-                  onStartColorVision: () => _go(4),
+                  onStartVisionTest: () => _go(4),
+                  onStartColorVision: () => _go(3),
                 ),
                 _HowToContent(
-                  onGoVisionTest: () => _go(3),
-                  onGoColorVision: () => _go(4),
+                  onGoVisionTest: () => _go(4),
+                  onGoColorVision: () => _go(3),
                 ),
                 const _AboutContent(),
-                const TestContent(),
                 const ColorBlindnessScreen(),
+                const TestContent(),
                 const _ReportTab(),
+                const _ContactTab(),
               ],
             ),
           ),
@@ -568,17 +573,17 @@ class _HowToContent extends StatelessWidget {
                 SizedBox(
                   width: 220,
                   child: FilledButton.icon(
-                    icon: const Icon(Icons.visibility_outlined),
-                    label: const Text('Go to Vision Test'),
-                    onPressed: onGoVisionTest,
-                  ),
-                ),
-                SizedBox(
-                  width: 240,
-                  child: FilledButton.icon(
                     icon: const Icon(Icons.palette_outlined),
                     label: const Text('Go to Color Vision'),
                     onPressed: onGoColorVision,
+                  ),
+                ),
+                SizedBox(
+                  width: 220,
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.visibility_outlined),
+                    label: const Text('Go to Vision Test'),
+                    onPressed: onGoVisionTest,
                   ),
                 ),
               ],
@@ -694,7 +699,7 @@ class _AboutContent extends StatelessWidget {
   }
 }
 
-// ================== TEST + REPORT TABS ==================
+// ================== TEST TAB ==================
 class TestContent extends StatelessWidget {
   const TestContent({super.key});
 
@@ -731,6 +736,111 @@ class _ReportTab extends StatelessWidget {
           child: Glass(
             child: Padding(padding: EdgeInsets.all(12), child: ReportBody()),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ================== CONTACT TAB ==================
+class _ContactTab extends StatelessWidget {
+  const _ContactTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+
+    Widget row({
+      required IconData icon,
+      required String label,
+      required String value,
+    }) {
+      return Glass(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: _Brand.teal, size: 28),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: t.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  SelectableText(
+                    value,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.95),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1000),
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Text(
+              'Contact PeekVision',
+              style: t.headlineLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 30,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Questions, feedback, support, partnerships, or collaboration inquiries.',
+              style: t.titleMedium?.copyWith(
+                color: Colors.white.withOpacity(0.95),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+              ),
+            ),
+            const SizedBox(height: 18),
+            row(
+              icon: Icons.email_outlined,
+              label: 'Email',
+              value: 'pradeepkumar.sambamurthy@gmail.com',
+            ),
+            const SizedBox(height: 12),
+            row(
+              icon: Icons.phone_outlined,
+              label: 'Phone',
+              value: '+1 7622171069',
+            ),
+            const SizedBox(height: 12),
+            row(
+              icon: Icons.language_outlined,
+              label: 'Website',
+              value: 'https://peekvision.io',
+            ),
+            const SizedBox(height: 12),
+            row(
+              icon: Icons.medical_information_outlined,
+              label: 'Medical disclaimer',
+              value:
+                  'PeekVision is a screening tool only and is not a medical diagnosis. If you have symptoms, sudden vision changes, eye pain, eye injury, or concerns about your vision, please consult a licensed eye-care professional.',
+            ),
+          ],
         ),
       ),
     );
