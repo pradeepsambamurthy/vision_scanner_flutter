@@ -91,15 +91,18 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   }
 
   String _simpleMeaning(double logMAR) {
-    final denom = (20 * math.pow(10, logMAR)).round();
+   final denom = (20 * math.pow(10, logMAR)).round();
 
-    if (denom <= 20) {
-      return 'This eye appears to see clearly at distance in this screening.';
-    } else if (denom <= 40) {
-      return 'This eye may have mild difficulty seeing clearly.';
-    } else {
-      return 'This eye may have noticeable difficulty seeing clearly.';
-    }
+   final testType =
+       _mode == vm.TestMode.distance ? 'distance vision' : 'near vision';
+
+   if (denom <= 20) {
+     return 'This screening result suggests relatively good $testType under the test conditions.';
+   } else if (denom <= 40) {
+     return 'This screening result may indicate some difficulty with $testType.';
+   } else {
+     return 'This screening result may indicate greater difficulty with $testType. Consider discussing the result with an eye-care professional.';
+   }
   }
 
   String _bothEyesMeaning() {
@@ -224,6 +227,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
       mode: _mode,
       right: vm.AcuityResult(_resultRight!),
       left: vm.AcuityResult(_resultLeft!),
+      both: vm.AcuityResult(_resultBoth!),
     );
 
     if (!mounted) return;
@@ -240,29 +244,52 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   }
 
   void _switchModeAndReset(vm.TestMode m) {
-    setState(() {
-      _mode = m;
-      _resetAll();
-    });
-  }
+   setState(() {
+     _mode = m;
+     _stage = _Stage.idleRight;
+     _resultRight = null;
+     _resultLeft = null;
+     _resultBoth = null;
+     _resetForEye();
+   });
+ }
 
   @override
   Widget build(BuildContext context) {
     final title = _mode == vm.TestMode.distance
-        ? 'Vision Test — Distance'
-        : 'Vision Test — Near / Reading';
+        ? 'Free Online Distance Visual Acuity Test'
+        : 'Free Online Near Vision Test';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
-          ),
+         padding: const EdgeInsets.symmetric(vertical: 6),
+         child: Column(
+           children: [
+             Text(
+               title,
+               textAlign: TextAlign.center,
+               style: const TextStyle(
+                 fontWeight: FontWeight.w800,
+                 fontSize: 22,
+               ),
+             ),
+             const SizedBox(height: 6),
+             Text(
+              _mode == vm.TestMode.distance
+                  ? 'Check your distance visual acuity using a preliminary online eye-chart screening. Follow the distance and eye-covering instructions carefully.'
+                  : 'Check your near and reading vision using a preliminary online vision screening. Follow the viewing-distance instructions carefully.',
+             textAlign: TextAlign.center,
+             style: const TextStyle(
+               fontSize: 14,
+               color: Colors.black54,
+               height: 1.35,
+              ),
+            ),
+          ],
         ),
+       ),
         Expanded(
           child: Card(
             color: Colors.white,
@@ -565,7 +592,7 @@ class _TestRun extends StatelessWidget {
           Align(
             alignment: Alignment.center,
             child: Text(
-              'Line ${index + 1} of ${steps.length} • Estimated vision: ${snellen(cur)}',
+              'Line ${index + 1} of ${steps.length} • Screening estimate: ${snellen(cur)}',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
@@ -637,7 +664,7 @@ class _FinishPanel extends StatelessWidget {
               Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
               Text(
-                'Estimated vision: $result',
+                'Screening estimate: $result',
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 6),
@@ -664,7 +691,7 @@ class _FinishPanel extends StatelessWidget {
 
         const SizedBox(height: 12),
         const Text(
-          'This is a screening result only. It is not a medical diagnosis.',
+          'This is a preliminary screening result only. It is not a diagnosis or prescription and does not replace a comprehensive eye examination by a qualified eye-care professional.',
           style: TextStyle(color: Colors.black54),
         ),
         const SizedBox(height: 16),

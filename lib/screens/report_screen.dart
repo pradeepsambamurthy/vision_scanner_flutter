@@ -101,7 +101,7 @@ class ReportBody extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Estimated vision: $value',
+                'Screening estimate: $value',
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 15,
@@ -131,17 +131,17 @@ class ReportBody extends StatelessWidget {
           text.contains('20/5') ||
           text.contains('20/4') ||
           text.contains('20/3')) {
-        return 'This eye appears to see clearly in this screening.';
+        return 'This screening result suggests relatively good visual acuity under the test conditions.';
       }
 
       if (text.contains('20/25') ||
           text.contains('20/30') ||
           text.contains('20/32') ||
           text.contains('20/40')) {
-        return 'This eye may have mild difficulty seeing clearly. Repeat the test in good lighting to confirm.';
+        return 'This screening result may indicate some difficulty seeing clearly. Consider repeating the test under recommended conditions.';
       }
 
-      return 'This eye may have noticeable difficulty seeing clearly. Consider a professional eye exam if this result repeats.';
+      return 'This screening result may indicate greater difficulty seeing clearly. If the result repeats or you have concerns, consider a comprehensive eye examination.';
     }
 
     String bothEyesMeaning(dynamic both, dynamic right, dynamic left) {
@@ -191,7 +191,7 @@ class ReportBody extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 data.warning ??
-                    'No major concern was detected in this screening.',
+                    'This screening did not identify an obvious concern based on the available results.',
                 style: const TextStyle(height: 1.35),
               ),
             ],
@@ -292,7 +292,7 @@ class ReportBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Result: ${cbText('diagnosis')}',
+                  'Screening result: ${cbText('diagnosis')}',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),
@@ -300,10 +300,10 @@ class ReportBody extends StatelessWidget {
                   'Score: ${cbText('correct')} out of ${cbText('total')} plates',
                 ),
                 const SizedBox(height: 6),
-                Text('Accuracy: $cbAccPct%'),
+                Text('Plate-match score: $cbAccPct%'),
                 const SizedBox(height: 10),
                 const Text(
-                  'This checks for possible red-green color vision difficulty. It is not a diagnosis.',
+                  'This preliminary screening checks for possible red-green color vision differences. Results can be affected by display settings, brightness, lighting, and viewing conditions. It is not a diagnosis.',
                   style: TextStyle(height: 1.35),
                 ),
               ],
@@ -335,7 +335,7 @@ class ReportBody extends StatelessWidget {
 
         const SizedBox(height: 8),
         const Text(
-          'Important: PeekVision is a screening tool only. It is not a medical diagnosis.',
+          'Important: PeekVision provides preliminary vision screening only. Results are not a diagnosis or prescription and do not replace a comprehensive eye examination by a qualified eye-care professional.',
           style: TextStyle(
             color: Color(0xFFA85500),
             fontWeight: FontWeight.w700,

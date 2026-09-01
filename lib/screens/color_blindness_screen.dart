@@ -78,27 +78,27 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
   }
 
   String _resultTitle({required int correct, required int total}) {
-    if (correct >= total - 1) {
-      return 'No major color vision difficulty indicated.';
-    }
+  if (correct >= total - 1) {
+    return 'Responses were generally consistent with the expected plate answers.';
+  }
 
-    if (correct >= (total * 0.70).round()) {
-      return 'Mild color vision difficulty may be possible.';
-    }
+  if (correct >= (total * 0.70).round()) {
+    return 'Some responses differed from the expected plate answers.';
+  }
 
-    return 'Possible red-green color vision difficulty indicated.';
+  return 'Several responses differed from the expected plate answers.';
   }
 
   String _resultExplanation({required int correct, required int total}) {
-    if (correct >= total - 1) {
-      return 'Your responses were mostly consistent with the expected Ishihara-style plate answers.';
-    }
+  if (correct >= total - 1) {
+    return 'Most of your responses matched the expected answers for these Ishihara-style screening plates. This result is for preliminary screening only.';
+  }
 
-    if (correct >= (total * 0.70).round()) {
-      return 'You missed a few plates. This does not diagnose color blindness. You may want to repeat the test in good lighting, with screen brightness high, and without color filters.';
-    }
+  if (correct >= (total * 0.70).round()) {
+    return 'Some responses did not match the expected answers. Screen brightness, display color settings, lighting, viewing distance, and device calibration can affect the result. Consider repeating the screening under recommended conditions.';
+  }
 
-    return 'You missed several plates. This does not diagnose color blindness, but it suggests you should consider an eye exam with an optometrist or ophthalmologist.';
+  return 'Several responses did not match the expected answers. This does not diagnose a color vision condition. Consider discussing the result with an optometrist or ophthalmologist, especially if you have concerns about color perception.';
   }
 
   String _missedPlateSummary() {
@@ -130,14 +130,14 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
         'Missed plates: $missed\n\n'
         '${_resultExplanation(correct: correctCount, total: total)}\n\n'
         '${_missedPlateSummary()}\n\n'
-        'Screening only — not a diagnosis.';
+        'Preliminary screening only — not a diagnosis. This result does not replace a comprehensive eye examination or professional color vision assessment.';
   }
 
   void _showFinalResultDialog() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Color Screening Result'),
+        title: const Text('Color Vision Screening Result'),
         content: SingleChildScrollView(
           child: Text(
             _finalResultText(),
@@ -215,23 +215,6 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
     }
   }
 
-  void onShowHintPressed() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Hint'),
-        content: const Text(
-          'Look for the number formed by dots with slightly different color/brightness.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ---------- UI helpers ----------
   Widget _glassModal({required Widget child}) {
@@ -282,7 +265,7 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
           collapsedIconColor: Colors.black87,
           iconColor: Colors.black87,
           title: const Text(
-            'Instructions (tap to expand)',
+            'Color Vision Screening Instructions',
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w800,
@@ -291,13 +274,13 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
           ),
           children: const [
             Text(
-              'Screening only — not a diagnosis.\n\n'
+              'This is a preliminary color vision screening only and is not a medical diagnosis.\n\n'
               'Display setup:\n'
-              '• Brightness 80–100%\n'
+              '• Use a comfortable, bright display setting\n'
               '• Disable Night Mode / True Tone / blue-light filters\n'
               '• Avoid glare/reflections\n\n'
               'Distance + timing:\n'
-              '• Sit 30–50 cm (12–20 in) from the screen\n'
+              '• Sit approximately 30–50 cm (12–20 in) from the screen\n'
               '• View each plate for 3–5 seconds only\n'
               '• Answer the FIRST number you see\n\n'
               'Glasses / contacts:\n'
@@ -319,39 +302,23 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
   }
 
   Widget _footerBar() {
-    return Row(
-      children: [
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: onCheckPressed,
-            icon: const Icon(Icons.check),
-            label: Text(index == plates.length - 1 ? 'Finish' : 'Check'),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-          ),
+  return SizedBox(
+    width: double.infinity,
+    child: FilledButton.icon(
+      onPressed: onCheckPressed,
+      icon: const Icon(Icons.check),
+      label: Text(
+        index == plates.length - 1 ? 'Finish' : 'Check',
+      ),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: onShowHintPressed,
-            icon: const Icon(Icons.lightbulb_outline),
-            label: const Text('Show hint'),
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
+      ),
+    ),
+  );
+}
   @override
   Widget build(BuildContext context) {
     final currentExpectedAnswer = expectedAnswers[index];
@@ -372,12 +339,13 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
                     final double available =
                         (c.maxHeight - topBlock - bottomBlock).clamp(220, 520);
 
-                    return Column(
+                    return SingleChildScrollView(
+                      child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Center(
                           child: Text(
-                            'Color Vision Test — Ishihara',
+                            'Free Online Color Vision Screening',
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 18,
@@ -386,6 +354,18 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
+                        const Text(
+                        'Use Ishihara-style plates for a preliminary online color vision screening for possible red-green color vision differences. Results can be affected by screen brightness, display color settings, calibration, lighting, and viewing conditions.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.black87,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                       ),
+                     ),
+
+                     const SizedBox(height: 12),
 
                         _instructionsDropdown(),
                         const SizedBox(height: 10),
@@ -421,7 +401,7 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
                               ),
                             ),
                             Text(
-                              'Score: $correctCount / ${userAnswers.length}',
+                              'Completed: ${userAnswers.length} / ${plates.length}',
                               style: const TextStyle(
                                 fontWeight: FontWeight.w700,
                                 color: Colors.black54,
@@ -461,6 +441,7 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
                         const SizedBox(height: 12),
                         _footerBar(),
                       ],
+                     ),
                     );
                   },
                 ),

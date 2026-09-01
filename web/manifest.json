@@ -1,11 +1,11 @@
 {
-    "name": "eyesight_flutter",
-    "short_name": "eyesight_flutter",
+    "name": "PeekVision.io",
+    "short_name": "PeekVision",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Free online preliminary vision screening and visual acuity testing with PeekVision.io.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
