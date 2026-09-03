@@ -1,35 +1,22 @@
 // lib/services/report_service.dart
-import 'dart:math' as math;
 import '../models/vision_models.dart' as vm;
-
-/// Internal, lightweight representation of an eye’s acuity used by the report.
-class _PseudoAcuity {
-  final double logMAR;
-  const _PseudoAcuity(this.logMAR);
-
-  String get snellen {
-    final denom = (20 * math.pow(10, logMAR)).round();
-    return '20/$denom';
-  }
-
-  int get denominator {
-    return (20 * math.pow(10, logMAR)).round();
-  }
-
-  @override
-  String toString() => snellen;
-}
 
 class ReportFace {
   final int? age;
   final String? gender;
   final bool? wearingGlasses;
 
-  const ReportFace({this.age, this.gender, this.wearingGlasses});
+  const ReportFace({
+    this.age,
+    this.gender,
+    this.wearingGlasses,
+  });
 
-  Map<String, dynamic> toMap() =>
-      {'age': age, 'gender': gender, 'wearingGlasses': wearingGlasses}
-        ..removeWhere((_, v) => v == null);
+  Map<String, dynamic> toMap() => {
+        'age': age,
+        'gender': gender,
+        'wearingGlasses': wearingGlasses,
+      }..removeWhere((_, value) => value == null);
 }
 
 class ReportData {
@@ -39,17 +26,33 @@ class ReportData {
 
   ReportFace? face;
 
-  _PseudoAcuity? right;
-  _PseudoAcuity? left;
-  _PseudoAcuity? both;
+  // ================================================================
+  // DISTANCE VISUAL ACUITY
+  // ================================================================
 
-  _PseudoAcuity? distanceRight;
-  _PseudoAcuity? distanceLeft;
-  _PseudoAcuity? distanceBoth;
+  vm.AcuityResult? distanceRight;
+  vm.AcuityResult? distanceLeft;
+  vm.AcuityResult? distanceBoth;
 
-  _PseudoAcuity? nearRight;
-  _PseudoAcuity? nearLeft;
-  _PseudoAcuity? nearBoth;
+  // ================================================================
+  // NEAR VISUAL ACUITY
+  // ================================================================
+
+  vm.AcuityResult? nearRight;
+  vm.AcuityResult? nearLeft;
+  vm.AcuityResult? nearBoth;
+
+  // ================================================================
+  // LEGACY / GENERAL REFERENCES
+  // ================================================================
+
+  vm.AcuityResult? right;
+  vm.AcuityResult? left;
+  vm.AcuityResult? both;
+
+  // ================================================================
+  // REPORT TEXT
+  // ================================================================
 
   String? warning;
   String? ageGroupLabel;
@@ -58,73 +61,202 @@ class ReportData {
 
   Map<String, dynamic>? colorBlindness;
 
+  // ================================================================
+  // AVAILABILITY
+  // ================================================================
+
   bool get hasDistance =>
-      distanceRight != null || distanceLeft != null || distanceBoth != null;
+      distanceRight != null ||
+      distanceLeft != null ||
+      distanceBoth != null;
 
-  bool get hasNear => nearRight != null || nearLeft != null || nearBoth != null;
+  bool get hasNear =>
+      nearRight != null ||
+      nearLeft != null ||
+      nearBoth != null;
 
-  String get overallLabel => _worst?.snellen ?? '—';
+  bool get hasColorVision =>
+      colorBlindness != null;
 
-  String get assessment {
-    return 'Right eye: ${right?.snellen ?? '—'} | '
-        'Left eye: ${left?.snellen ?? '—'} | '
-        'Both eyes: ${both?.snellen ?? '—'}';
+  bool get hasAnyReport =>
+      hasDistance ||
+      hasNear ||
+      hasColorVision;
+
+  // ================================================================
+  // SIMPLE SUMMARY
+  // ================================================================
+
+  String get overallLabel {
+    final worst = _worstResult;
+
+    if (worst == null) {
+      return '—';
+    }
+
+    return worst.screeningLevel;
   }
 
-  _PseudoAcuity? get _worst {
-    final values = <_PseudoAcuity>[
+  String get assessment {
+    return 'Right eye: ${right?.screeningLevel ?? '—'} | '
+        'Left eye: ${left?.screeningLevel ?? '—'} | '
+        'Both eyes: ${both?.screeningLevel ?? '—'}';
+  }
+
+  vm.AcuityResult? get _worstResult {
+    final results = <vm.AcuityResult>[
       if (right != null) right!,
       if (left != null) left!,
       if (both != null) both!,
     ];
 
-    if (values.isEmpty) return null;
+    if (results.isEmpty) {
+      return null;
+    }
 
-    values.sort((a, b) => b.logMAR.compareTo(a.logMAR));
-    return values.first;
+    results.sort(
+      (a, b) => b.logMAR.compareTo(a.logMAR),
+    );
+
+    return results.first;
   }
 
-  Map<String, dynamic> toMapForStorage() => {
-    'name': name,
-    'age': age ?? face?.age,
-    'gender': gender ?? face?.gender,
-    'face': face?.toMap(),
-    'distanceRight': distanceRight?.snellen,
-    'distanceLeft': distanceLeft?.snellen,
-    'distanceBoth': distanceBoth?.snellen,
-    'nearRight': nearRight?.snellen,
-    'nearLeft': nearLeft?.snellen,
-    'nearBoth': nearBoth?.snellen,
-    'warning': warning,
-    'ageGroup': ageGroupLabel,
-    'ageVerdict': ageAdjustedVerdict,
-    'refractiveHint': refractiveHint,
-    'colorBlindness': colorBlindness,
-  }..removeWhere((_, v) => v == null);
+  // ================================================================
+  // STORAGE
+  // ================================================================
+
+  Map<String, dynamic> _acuityToMap(
+    vm.AcuityResult? result,
+  ) {
+    if (result == null) {
+      return {};
+    }
+
+    return {
+      'logMAR': result.logMAR,
+      'snellen': result.snellen,
+      'screeningLevel': result.screeningLevel,
+      'eye': result.eye.name,
+      'belowRange': result.belowRange,
+      'correction': result.correction.name,
+      'correctionLabel': result.correction.label,
+      'testDistanceCm': result.testDistanceCm,
+      'testDistanceLabel': result.testDistanceLabel,
+    };
+  }
+
+  Map<String, dynamic> toMapForStorage() {
+    final map = <String, dynamic>{
+      'name': name,
+      'age': age ?? face?.age,
+      'gender': gender ?? face?.gender,
+      'face': face?.toMap(),
+
+      'distanceRight':
+          distanceRight == null
+              ? null
+              : _acuityToMap(distanceRight),
+
+      'distanceLeft':
+          distanceLeft == null
+              ? null
+              : _acuityToMap(distanceLeft),
+
+      'distanceBoth':
+          distanceBoth == null
+              ? null
+              : _acuityToMap(distanceBoth),
+
+      'nearRight':
+          nearRight == null
+              ? null
+              : _acuityToMap(nearRight),
+
+      'nearLeft':
+          nearLeft == null
+              ? null
+              : _acuityToMap(nearLeft),
+
+      'nearBoth':
+          nearBoth == null
+              ? null
+              : _acuityToMap(nearBoth),
+
+      'warning': warning,
+      'ageGroup': ageGroupLabel,
+      'ageVerdict': ageAdjustedVerdict,
+      'refractiveHint': refractiveHint,
+      'colorBlindness': colorBlindness,
+    };
+
+    map.removeWhere(
+      (_, value) => value == null,
+    );
+
+    return map;
+  }
 }
 
 class ReportService {
   ReportService._();
-  static final ReportService instance = ReportService._();
 
-  final ReportData current = ReportData();
+  static final ReportService instance =
+      ReportService._();
 
-  void setDemographics({String? name, int? age, String? gender}) {
-    current.name = (name == null || name.trim().isEmpty) ? null : name.trim();
+  final ReportData current =
+      ReportData();
+
+  // ================================================================
+  // DEMOGRAPHICS
+  // ================================================================
+
+  void setDemographics({
+    String? name,
+    int? age,
+    String? gender,
+  }) {
+    current.name =
+        (name == null ||
+                name.trim().isEmpty)
+            ? null
+            : name.trim();
+
     current.age = age;
     current.gender = gender;
+
+    _recomputeAssessments();
   }
 
-  String? get currentGender => current.gender;
-  String? get currentName => current.name;
-  int? get currentAge => current.age;
+  String? get currentGender =>
+      current.gender;
 
-  void updateName(String? v) =>
-      current.name = (v == null || v.trim().isEmpty) ? null : v.trim();
+  String? get currentName =>
+      current.name;
 
-  void updateAge(int? v) => current.age = v;
+  int? get currentAge =>
+      current.age;
 
-  void updateGender(String? v) => current.gender = v;
+  void updateName(String? value) {
+    current.name =
+        (value == null ||
+                value.trim().isEmpty)
+            ? null
+            : value.trim();
+  }
+
+  void updateAge(int? value) {
+    current.age = value;
+
+    _recomputeAssessments();
+  }
+
+  void updateGender(String? value) {
+    current.gender = value;
+  }
+
+  // ================================================================
+  // FACE SUMMARY
+  // ================================================================
 
   void updateFaceSummary(dynamic face) {
     int? age;
@@ -132,18 +264,36 @@ class ReportService {
     bool? glasses;
 
     try {
-      final a = face?.age ?? face?.estimatedAge ?? face?.ageYears;
-      if (a is num) age = a.toInt();
+      final value =
+          face?.age ??
+          face?.estimatedAge ??
+          face?.ageYears;
+
+      if (value is num) {
+        age = value.toInt();
+      }
     } catch (_) {}
 
     try {
-      final g = face?.gender ?? face?.sex;
-      if (g is String && g.trim().isNotEmpty) gender = g.trim();
+      final value =
+          face?.gender ??
+          face?.sex;
+
+      if (value is String &&
+          value.trim().isNotEmpty) {
+        gender = value.trim();
+      }
     } catch (_) {}
 
     try {
-      final w = face?.wearingGlasses ?? face?.glasses ?? face?.hasGlasses;
-      if (w is bool) glasses = w;
+      final value =
+          face?.wearingGlasses ??
+          face?.glasses ??
+          face?.hasGlasses;
+
+      if (value is bool) {
+        glasses = value;
+      }
     } catch (_) {}
 
     current.face = ReportFace(
@@ -151,7 +301,13 @@ class ReportService {
       gender: gender,
       wearingGlasses: glasses,
     );
+
+    _recomputeAssessments();
   }
+
+  // ================================================================
+  // COLOR VISION
+  // ================================================================
 
   void setColorBlindnessResult({
     required int total,
@@ -169,8 +325,19 @@ class ReportService {
     };
   }
 
-  void updateAcuity(vm.AcuityResult right, vm.AcuityResult left) {
-    updateAcuityModeAware(mode: vm.TestMode.distance, right: right, left: left);
+  // ================================================================
+  // VISUAL ACUITY
+  // ================================================================
+
+  void updateAcuity(
+    vm.AcuityResult right,
+    vm.AcuityResult left,
+  ) {
+    updateAcuityModeAware(
+      mode: vm.TestMode.distance,
+      right: right,
+      left: left,
+    );
   }
 
   void updateAcuityModeAware({
@@ -179,36 +346,79 @@ class ReportService {
     required vm.AcuityResult left,
     vm.AcuityResult? both,
   }) {
-    final r = _PseudoAcuity(right.logMAR);
-    final l = _PseudoAcuity(left.logMAR);
-    final b = both == null ? null : _PseudoAcuity(both.logMAR);
+    if (mode ==
+        vm.TestMode.distance) {
+      current.distanceRight =
+          right;
 
-    if (mode == vm.TestMode.distance) {
-      current.distanceRight = r;
-      current.distanceLeft = l;
-      current.distanceBoth = b;
+      current.distanceLeft =
+          left;
+
+      current.distanceBoth =
+          both;
+    } else if (mode ==
+        vm.TestMode.near) {
+      current.nearRight =
+          right;
+
+      current.nearLeft =
+          left;
+
+      current.nearBoth =
+          both;
     } else {
-      current.nearRight = r;
-      current.nearLeft = l;
-      current.nearBoth = b;
+      /*
+        TestMode.both is not currently used as a separate
+        test workflow. If it is used later, preserve the
+        supplied results as the general values.
+      */
+      current.right = right;
+      current.left = left;
+      current.both = both;
     }
 
-    if (current.distanceRight != null ||
-        current.distanceLeft != null ||
-        current.distanceBoth != null) {
-      current.right = current.distanceRight;
-      current.left = current.distanceLeft;
-      current.both = current.distanceBoth;
-    } else {
-      current.right = current.nearRight;
-      current.left = current.nearLeft;
-      current.both = current.nearBoth;
+    /*
+      Keep the old general fields available for any older
+      parts of the application.
+
+      Prefer distance results if available.
+    */
+    if (current.hasDistance) {
+      current.right =
+          current.distanceRight;
+
+      current.left =
+          current.distanceLeft;
+
+      current.both =
+          current.distanceBoth;
+    } else if (current.hasNear) {
+      current.right =
+          current.nearRight;
+
+      current.left =
+          current.nearLeft;
+
+      current.both =
+          current.nearBoth;
     }
 
     _recomputeAssessments();
   }
 
-  static ReportData normalize(ReportData r) => r;
+  // ================================================================
+  // NORMALIZATION
+  // ================================================================
+
+  static ReportData normalize(
+    ReportData report,
+  ) {
+    return report;
+  }
+
+  // ================================================================
+  // RESET
+  // ================================================================
 
   void resetAll() {
     current
@@ -216,199 +426,361 @@ class ReportService {
       ..age = null
       ..gender = null
       ..face = null
+
       ..right = null
       ..left = null
       ..both = null
+
       ..distanceRight = null
       ..distanceLeft = null
       ..distanceBoth = null
+
       ..nearRight = null
       ..nearLeft = null
       ..nearBoth = null
+
       ..warning = null
       ..ageGroupLabel = null
       ..ageAdjustedVerdict = null
       ..refractiveHint = null
+
       ..colorBlindness = null;
   }
 
+  // ================================================================
+  // ASSESSMENTS
+  // ================================================================
+
   void _recomputeAssessments() {
-    final age = current.age ?? current.face?.age;
-    final ageInfo = _ageClassAndThreshold(age);
-    current.ageGroupLabel = ageInfo.label;
+    final age =
+        current.age ??
+        current.face?.age;
 
-    final worstDist = _maxNonNull([
-      current.distanceRight?.logMAR,
-      current.distanceLeft?.logMAR,
-      current.distanceBoth?.logMAR,
+    current.ageGroupLabel =
+        _ageGroupLabel(age);
+
+    final worstDistance =
+        _worstLogMAR([
+      current.distanceRight,
+      current.distanceLeft,
+      current.distanceBoth,
     ]);
 
-    final worstNear = _maxNonNull([
-      current.nearRight?.logMAR,
-      current.nearLeft?.logMAR,
-      current.nearBoth?.logMAR,
+    final worstNear =
+        _worstLogMAR([
+      current.nearRight,
+      current.nearLeft,
+      current.nearBoth,
     ]);
 
-    final diffDist = _absDiffOrNull(
-      current.distanceRight?.logMAR,
-      current.distanceLeft?.logMAR,
+    final distanceDifference =
+        _eyeDifference(
+      current.distanceRight,
+      current.distanceLeft,
     );
 
-    final diffNear = _absDiffOrNull(
-      current.nearRight?.logMAR,
-      current.nearLeft?.logMAR,
+    final nearDifference =
+        _eyeDifference(
+      current.nearRight,
+      current.nearLeft,
     );
 
-    current.warning = _buildWarningCombined(
-      rDist: current.distanceRight?.logMAR,
-      lDist: current.distanceLeft?.logMAR,
-      rNear: current.nearRight?.logMAR,
-      lNear: current.nearLeft?.logMAR,
+    current.warning =
+        _buildWarning(
+      worstDistance:
+          worstDistance,
+      worstNear:
+          worstNear,
+      distanceDifference:
+          distanceDifference,
+      nearDifference:
+          nearDifference,
     );
 
-    final overallWorst = _maxNonNull([worstDist, worstNear]);
+    current.ageAdjustedVerdict =
+        _buildOverallVerdict(
+      worstDistance:
+          worstDistance,
+      worstNear:
+          worstNear,
+    );
 
-    if (overallWorst != null && overallWorst <= ageInfo.passThresholdLogMAR) {
-      current.ageAdjustedVerdict =
-          'Your vision screening result appears to be within the expected range for your age group.';
-    } else {
-      current.ageAdjustedVerdict =
-          'Your vision screening result may be below the expected range for your age group.';
-    }
-
-    current.refractiveHint = _refractiveHintCombined(
-      worstDistance: worstDist,
-      worstNear: worstNear,
-      interEyeDiffDistance: diffDist,
-      interEyeDiffNear: diffNear,
-      age: age,
+    current.refractiveHint =
+        _buildPlainLanguageSummary(
+      worstDistance:
+          worstDistance,
+      worstNear:
+          worstNear,
+      distanceDifference:
+          distanceDifference,
+      nearDifference:
+          nearDifference,
     );
   }
 
-  String _buildWarningCombined({
-    double? rDist,
-    double? lDist,
-    double? rNear,
-    double? lNear,
-  }) {
-    const double consultThreshold = 0.30;
-    const double eyeDifferenceGap = 0.20;
+  // ================================================================
+  // OVERALL VERDICT
+  // ================================================================
 
-    bool reducedVision = false;
-    bool eyeDifference = false;
-
-    if (rDist != null && rDist >= consultThreshold) reducedVision = true;
-    if (lDist != null && lDist >= consultThreshold) reducedVision = true;
-    if (rNear != null && rNear >= consultThreshold) reducedVision = true;
-    if (lNear != null && lNear >= consultThreshold) reducedVision = true;
-
-    if (rDist != null &&
-        lDist != null &&
-        (rDist - lDist).abs() >= eyeDifferenceGap) {
-      eyeDifference = true;
-    }
-
-    if (rNear != null &&
-        lNear != null &&
-        (rNear - lNear).abs() >= eyeDifferenceGap) {
-      eyeDifference = true;
-    }
-
-    if (reducedVision) {
-      return 'One or both eyes may have some difficulty seeing clearly. Please consider a professional eye exam.';
-    }
-
-    if (eyeDifference) {
-      return 'There is a noticeable difference between your right and left eye. If this happens again, consider a professional eye exam.';
-    }
-
-    return 'No major concern was detected in this screening.';
-  }
-
-  _AgeInfo _ageClassAndThreshold(int? age) {
-    if (age == null) return const _AgeInfo('Adult', 0.20);
-    if (age <= 5) return const _AgeInfo('Child under 6', 0.20);
-    if (age <= 12) return const _AgeInfo('Child', 0.18);
-    if (age <= 17) return const _AgeInfo('Teen', 0.20);
-    if (age <= 39) return const _AgeInfo('Adult', 0.20);
-    if (age <= 59) return const _AgeInfo('Adult 40–59', 0.20);
-    return const _AgeInfo('Older adult 60+', 0.30);
-  }
-
-  String _refractiveHintCombined({
+  String _buildOverallVerdict({
     required double? worstDistance,
     required double? worstNear,
-    required double? interEyeDiffDistance,
-    required double? interEyeDiffNear,
-    required int? age,
   }) {
-    const double okCut = 0.20;
-    const double reducedCut = 0.30;
-    const double bigGap = 0.20;
-
-    final a = age ?? 0;
-
-    final gapBig =
-        (interEyeDiffDistance != null && interEyeDiffDistance >= bigGap) ||
-        (interEyeDiffNear != null && interEyeDiffNear >= bigGap);
-
-    if (gapBig) {
-      return 'Your right and left eye results are different. This can happen because of tiredness, lighting, screen distance, glasses, or an actual difference between the eyes.';
+    if (worstDistance == null &&
+        worstNear == null) {
+      return 'No visual acuity screening result is available.';
     }
 
-    if (worstDistance != null && worstNear == null) {
-      if (worstDistance >= reducedCut) {
-        return 'Your distance vision may need attention. This can happen with nearsightedness or other vision issues.';
-      }
-      return 'Your distance vision appears clear in this screening.';
+    final worst =
+        _maxNonNull([
+      worstDistance,
+      worstNear,
+    ]);
+
+    if (worst == null) {
+      return 'No visual acuity screening result is available.';
     }
 
-    if (worstNear != null && worstDistance == null) {
-      if (worstNear > okCut) {
-        return a >= 40
-            ? 'Your near vision may be reduced. This is common with age-related reading difficulty.'
-            : 'Your near vision may need attention.';
-      }
-      return 'Your near vision appears clear in this screening.';
+    /*
+      0.0 logMAR is approximately 20/20.
+
+      We compare results with the commonly used
+      20/20 reference rather than calling 20/20
+      "perfect vision".
+    */
+
+    if (worst <= 0.0) {
+      return 'The completed visual acuity screening reached the standard 20/20 reference level or better.';
     }
 
-    final distReduced = (worstDistance ?? 0) > okCut;
-    final nearReduced = (worstNear ?? 0) > okCut;
-
-    if (distReduced && !nearReduced) {
-      return 'Your distance vision may be weaker than your near vision.';
+    if (worst <= 0.10) {
+      return 'The completed visual acuity screening was slightly below the standard 20/20 reference level.';
     }
 
-    if (!distReduced && nearReduced) {
-      return a >= 40
-          ? 'Your near vision may be weaker. This can happen with age-related reading difficulty.'
-          : 'Your near vision may need attention.';
+    if (worst <= 0.30) {
+      return 'The completed visual acuity screening showed some reduction compared with the standard 20/20 reference level.';
     }
 
-    if (distReduced && nearReduced) {
-      return 'Your vision may be reduced for both distance and near tasks. Please consider a full eye exam.';
+    if (worst <= 0.50) {
+      return 'The completed visual acuity screening showed a moderate reduction compared with the standard 20/20 reference level.';
     }
 
-    return 'Your vision appears within the expected range in this screening.';
+    return 'The completed visual acuity screening showed a noticeable reduction compared with the standard 20/20 reference level.';
   }
 
-  double? _maxNonNull(List<double?> xs) {
-    double? result;
-    for (final x in xs) {
-      if (x == null) continue;
-      if (result == null || x > result) result = x;
+  // ================================================================
+  // WARNING
+  // ================================================================
+
+  String _buildWarning({
+    required double? worstDistance,
+    required double? worstNear,
+    required double? distanceDifference,
+    required double? nearDifference,
+  }) {
+    const significantEyeDifference =
+        0.20;
+
+    final eyeDifference =
+        (distanceDifference != null &&
+                distanceDifference >=
+                    significantEyeDifference) ||
+            (nearDifference != null &&
+                nearDifference >=
+                    significantEyeDifference);
+
+    if (eyeDifference) {
+      return 'The right and left eyes produced noticeably different screening levels. Repeat the screening under the recommended conditions. If the difference remains, consider a comprehensive eye examination.';
     }
+
+    final worst =
+        _maxNonNull([
+      worstDistance,
+      worstNear,
+    ]);
+
+    if (worst != null &&
+        worst >= 0.30) {
+      return 'One or more screening results were below the standard 20/20 reference level. Consider repeating the screening and seeking a comprehensive eye examination if the result remains similar.';
+    }
+
+    return 'No obvious difference requiring follow-up was identified from the available screening results.';
+  }
+
+  // ================================================================
+  // PLAIN LANGUAGE SUMMARY
+  // ================================================================
+
+  String _buildPlainLanguageSummary({
+    required double? worstDistance,
+    required double? worstNear,
+    required double? distanceDifference,
+    required double? nearDifference,
+  }) {
+    const eyeDifferenceThreshold =
+        0.20;
+
+    if ((distanceDifference != null &&
+            distanceDifference >=
+                eyeDifferenceThreshold) ||
+        (nearDifference != null &&
+            nearDifference >=
+                eyeDifferenceThreshold)) {
+      return 'One eye performed differently from the other during the screening. The final report shows the right-eye, left-eye, and both-eyes results separately for easier comparison.';
+    }
+
+    if (worstDistance != null &&
+        worstNear == null) {
+      if (worstDistance <= 0.0) {
+        return 'Distance vision reached the standard 20/20 screening reference level or better.';
+      }
+
+      if (worstDistance <= 0.30) {
+        return 'Distance vision was below the standard 20/20 reference in one or more tested eyes.';
+      }
+
+      return 'Distance vision showed a noticeable reduction compared with the standard 20/20 reference.';
+    }
+
+    if (worstNear != null &&
+        worstDistance == null) {
+      if (worstNear <= 0.0) {
+        return 'Near vision reached the standard screening reference level or better.';
+      }
+
+      if (worstNear <= 0.30) {
+        return 'Near vision was below the standard screening reference in one or more tested eyes.';
+      }
+
+      return 'Near vision showed a noticeable reduction during this screening.';
+    }
+
+    if (worstDistance != null &&
+        worstNear != null) {
+      final distanceGood =
+          worstDistance <= 0.0;
+
+      final nearGood =
+          worstNear <= 0.0;
+
+      if (distanceGood &&
+          nearGood) {
+        return 'Both distance and near visual acuity reached the standard screening reference level or better.';
+      }
+
+      if (!distanceGood &&
+          nearGood) {
+        return 'Distance visual acuity was weaker than near visual acuity in this screening.';
+      }
+
+      if (distanceGood &&
+          !nearGood) {
+        return 'Near visual acuity was weaker than distance visual acuity in this screening.';
+      }
+
+      return 'Both distance and near visual acuity were below the standard screening reference in one or more tested eyes.';
+    }
+
+    return 'Your screening results are available below.';
+  }
+
+  // ================================================================
+  // AGE LABEL
+  // ================================================================
+
+  String _ageGroupLabel(
+    int? age,
+  ) {
+    if (age == null) {
+      return 'Adult';
+    }
+
+    if (age <= 5) {
+      return 'Child under 6';
+    }
+
+    if (age <= 12) {
+      return 'Child';
+    }
+
+    if (age <= 17) {
+      return 'Teen';
+    }
+
+    if (age <= 39) {
+      return 'Adult';
+    }
+
+    if (age <= 59) {
+      return 'Adult 40–59';
+    }
+
+    return 'Older adult 60+';
+  }
+
+  // ================================================================
+  // MATH HELPERS
+  // ================================================================
+
+  double? _worstLogMAR(
+    List<vm.AcuityResult?> results,
+  ) {
+    double? worst;
+
+    for (final result in results) {
+      if (result == null) {
+        continue;
+      }
+
+      /*
+        A result below the measurable range should
+        be treated as worse than the recorded largest
+        line for summary purposes.
+      */
+      final value =
+          result.belowRange
+              ? result.logMAR + 0.10
+              : result.logMAR;
+
+      if (worst == null ||
+          value > worst) {
+        worst = value;
+      }
+    }
+
+    return worst;
+  }
+
+  double? _eyeDifference(
+    vm.AcuityResult? right,
+    vm.AcuityResult? left,
+  ) {
+    if (right == null ||
+        left == null) {
+      return null;
+    }
+
+    return (right.logMAR -
+            left.logMAR)
+        .abs();
+  }
+
+  double? _maxNonNull(
+    List<double?> values,
+  ) {
+    double? result;
+
+    for (final value in values) {
+      if (value == null) {
+        continue;
+      }
+
+      if (result == null ||
+          value > result) {
+        result = value;
+      }
+    }
+
     return result;
   }
-
-  double? _absDiffOrNull(double? a, double? b) {
-    if (a == null || b == null) return null;
-    return (a - b).abs();
-  }
-}
-
-class _AgeInfo {
-  final String label;
-  final double passThresholdLogMAR;
-  const _AgeInfo(this.label, this.passThresholdLogMAR);
 }
