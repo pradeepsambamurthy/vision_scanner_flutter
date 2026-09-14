@@ -796,6 +796,35 @@ Wrap(
   ],
 ),
 
+OutlinedButton.icon(
+  onPressed: () async {
+    final uri = Uri.parse(
+      'https://www.peekvision.io/20-20-vision.html',
+    );
+
+    await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+  },
+  icon: const Icon(Icons.remove_red_eye_outlined),
+  label: const Text('What Is 20/20 Vision?'),
+),
+
+OutlinedButton.icon(
+  onPressed: () async {
+    final uri = Uri.parse(
+      'https://www.peekvision.io/color-vision-test.html',
+    );
+
+    await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+  },
+  icon: const Icon(Icons.palette_outlined),
+  label: const Text('Color Vision Test'),
+),
 const SizedBox(height: 16),
 
             const SizedBox(height: 12),
