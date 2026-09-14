@@ -46,9 +46,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/charts/snellen_lines.json
-    - assets/models/dr_mobilenetv2_fp16.tflite
-    - assets/models/glasses_classifier.tflite
-    - assets/models/age_gender.tflite
     - assets/images/eye_bg.png
     - assets/images/logo_peekvision.png
     - assets/ishihara/
