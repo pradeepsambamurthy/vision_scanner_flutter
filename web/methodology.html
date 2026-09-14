@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>PeekVision Test Methodology | Visual Acuity & Color Vision</title>
+
+  <meta
+    name="description"
+    content="Learn how PeekVision performs browser-based visual acuity and color vision screening, including Snellen and logMAR results, testing conditions, accessibility features, and important limitations."
+  >
+
+  <meta name="robots" content="index,follow">
+
+  <link
+    rel="canonical"
+    href="https://www.peekvision.io/methodology.html"
+  >
+
+  <meta property="og:type" content="article">
+  <meta
+    property="og:title"
+    content="PeekVision Test Methodology"
+  >
+  <meta
+    property="og:description"
+    content="Understand how PeekVision performs browser-based visual acuity and color vision screening."
+  >
+  <meta
+    property="og:url"
+    content="https://www.peekvision.io/methodology.html"
+  >
+  <meta
+    property="og:image"
+    content="https://www.peekvision.io/images/peekvision-social-preview.png"
+  >
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta
+    name="twitter:title"
+    content="PeekVision Test Methodology"
+  >
+  <meta
+    name="twitter:description"
+    content="How PeekVision performs visual acuity and color vision screening in a web browser."
+  >
+  <meta
+    name="twitter:image"
+    content="https://www.peekvision.io/images/peekvision-social-preview.png"
+  >
+
+  <style>
+    :root {
+      --blue: #0b3b7a;
+      --blue2: #1e60e6;
+      --bg: #f5f8fc;
+      --text: #172033;
+      --muted: #5e6a7d;
+      --border: #dce4ef;
+      --white: #ffffff;
+      --soft: #eef4ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.65;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--blue), var(--blue2));
+      color: white;
+      padding: 64px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      max-width: 900px;
+      margin: 0 auto 16px;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.1;
+    }
+
+    header p {
+      max-width: 780px;
+      margin: 0 auto 26px;
+      font-size: 1.12rem;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 14px 24px;
+      border-radius: 999px;
+      background: white;
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .primary {
+      background: var(--blue2);
+      color: white;
+    }
+
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 40px 20px 70px;
+    }
+
+    section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 6px 24px rgba(20, 40, 80, 0.06);
+    }
+
+    h2 {
+      color: var(--blue);
+      margin-top: 0;
+    }
+
+    h3 {
+      color: var(--blue);
+    }
+
+    ul,
+    ol {
+      padding-left: 24px;
+    }
+
+    .note {
+      background: var(--soft);
+      border-left: 4px solid var(--blue2);
+      padding: 16px 18px;
+      border-radius: 8px;
+    }
+
+    .warning {
+      background: #fff7e8;
+      border-left: 4px solid #d97706;
+      padding: 16px 18px;
+      border-radius: 8px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--border);
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--soft);
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 30px 20px 50px;
+    }
+
+    footer a {
+      color: var(--blue2);
+    }
+
+    .updated {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "PeekVision Test Methodology",
+    "url": "https://www.peekvision.io/methodology.html",
+    "description": "Methodology and limitations of PeekVision browser-based visual acuity and color vision screening.",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "PeekVision.io",
+      "url": "https://www.peekvision.io/"
+    }
+  }
+  </script>
+</head>
+
+<body>
+
+<header>
+  <h1>PeekVision Test Methodology</h1>
+
+  <p>
+    Learn how PeekVision performs browser-based visual acuity and
+    color vision screening, how results are represented, and what
+    limitations should be considered when interpreting a result.
+  </p>
+
+  <a class="button" href="https://www.peekvision.io/">
+    Start Vision Screening
+  </a>
+</header>
+
+<main>
+
+  <section>
+    <h2>Purpose of PeekVision</h2>
+
+    <p>
+      PeekVision is a browser-based informational vision screening tool.
+      It is designed to help users perform a preliminary check of visual
+      acuity and color vision using a computer or compatible mobile device.
+    </p>
+
+    <p>
+      PeekVision is not intended to provide a medical diagnosis,
+      prescription, or replacement for a comprehensive eye examination.
+    </p>
+
+    <p class="updated">
+      Last reviewed: September 14, 2026
+    </p>
+  </section>
+
+  <section>
+    <h2>Visual acuity screening</h2>
+
+    <p>
+      Visual acuity describes the ability to resolve fine visual detail.
+      PeekVision presents progressively smaller letter optotypes and records
+      the smallest level that the user reports being able to read.
+    </p>
+
+    <p>
+      The standard screening uses Sloan-style letters and presents
+      five letters per level.
+    </p>
+
+    <p>
+      Testing can be performed separately for:
+    </p>
+
+    <ul>
+      <li>Right eye — OD</li>
+      <li>Left eye — OS</li>
+      <li>Both eyes — OU</li>
+    </ul>
+
+    <p>
+      Testing each eye separately can help reveal differences between the eyes
+      that may not be obvious when both eyes are open.
+    </p>
+  </section>
+
+  <section>
+    <h2>Snellen visual acuity</h2>
+
+    <p>
+      PeekVision reports visual acuity using familiar Snellen-style values
+      such as 20/20, 20/40, and 20/100.
+    </p>
+
+    <p>
+      In a Snellen measurement, the first number represents the standard
+      testing distance in feet. The second number indicates the distance at
+      which a reference observer is expected to resolve the same level of detail.
+    </p>
+
+    <p>
+      For example, 20/40 means that the tested level of detail seen at
+      20 feet corresponds approximately to detail a reference observer
+      may identify at 40 feet.
+    </p>
+
+    <div class="note">
+      20/20 is a commonly used reference for visual acuity.
+      It should not be described as "perfect vision," because visual function
+      includes many abilities beyond high-contrast letter acuity.
+    </div>
+  </section>
+
+  <section>
+    <h2>logMAR representation</h2>
+
+    <p>
+      PeekVision also uses logMAR internally to represent visual acuity levels.
+      logMAR is a logarithmic visual acuity scale commonly used in clinical
+      research and standardized acuity measurement.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Approximate logMAR</th>
+            <th>Snellen equivalent</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>1.3</td>
+            <td>20/400</td>
+          </tr>
+          <tr>
+            <td>1.0</td>
+            <td>20/200</td>
+          </tr>
+          <tr>
+            <td>0.7</td>
+            <td>20/100</td>
+          </tr>
+          <tr>
+            <td>0.4</td>
+            <td>20/50</td>
+          </tr>
+          <tr>
+            <td>0.3</td>
+            <td>20/40</td>
+          </tr>
+          <tr>
+            <td>0.2</td>
+            <td>20/32</td>
+          </tr>
+          <tr>
+            <td>0.1</td>
+            <td>20/25</td>
+          </tr>
+          <tr>
+            <td>0.0</td>
+            <td>20/20</td>
+          </tr>
+          <tr>
+            <td>-0.1</td>
+            <td>20/16</td>
+          </tr>
+          <tr>
+            <td>-0.3</td>
+            <td>20/10</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Standard Vision Test</h2>
+
+    <p>
+      The Standard Vision Test begins with relatively larger optotypes
+      and progresses toward smaller acuity levels as the user indicates
+      that letters remain readable.
+    </p>
+
+    <p>
+      The current screening sequence covers approximately:
+    </p>
+
+    <p>
+      20/50 → 20/40 → 20/32 → 20/25 → 20/20 → 20/16 →
+      20/13 → 20/10 → 20/8 → 20/6 → 20/5 → 20/4.
+    </p>
+
+    <p>
+      Users indicate whether the displayed row can or cannot be read.
+      Results depend on following the viewing-distance and test-condition
+      instructions as closely as possible.
+    </p>
+  </section>
+
+  <section>
+    <h2>Accessible Vision Test</h2>
+
+    <p>
+      PeekVision includes an accessible screening mode intended to make
+      the test easier to use for people who may have difficulty interacting
+      with smaller controls or standard test interfaces.
+    </p>
+
+    <p>
+      Accessibility features include:
+    </p>
+
+    <ul>
+      <li>Large high-contrast letters</li>
+      <li>Large response controls</li>
+      <li>Spoken instructions</li>
+      <li>Optional voice responses</li>
+      <li>Manual response fallback</li>
+      <li>No requirement to respond within a short time limit</li>
+    </ul>
+
+    <p>
+      Test letters themselves are not read aloud because doing so would
+      reveal the answer.
+    </p>
+
+    <p>
+      The accessible screening focuses on larger acuity levels ranging
+      approximately from 20/400 through 20/50.
+    </p>
+  </section>
+
+  <section>
+    <h2>Distance and near screening</h2>
+
+    <p>
+      PeekVision supports both distance and near screening modes.
+    </p>
+
+    <p>
+      Users should follow the viewing-distance instructions shown by the
+      application. Distance from the screen matters because the angular size
+      of an optotype changes when the viewing distance changes.
+    </p>
+
+    <p>
+      Near testing is intended to provide a preliminary assessment of
+      close-range visual performance under the specified test conditions.
+    </p>
+  </section>
+
+  <section>
+    <h2>Correction status</h2>
+
+    <p>
+      Users can indicate whether the screening is being performed with
+      their normal glasses or contact lenses.
+    </p>
+
+    <p>
+      This information provides context for the screening result.
+      PeekVision does not determine a spectacle or contact-lens prescription.
+    </p>
+  </section>
+
+  <section>
+    <h2>Color vision screening</h2>
+
+    <p>
+      PeekVision includes a browser-based color vision screening using
+      colored-dot plates designed to evaluate recognition of color patterns.
+    </p>
+
+    <p>
+      Color screening can be affected significantly by:
+    </p>
+
+    <ul>
+      <li>Display calibration</li>
+      <li>Screen brightness</li>
+      <li>Night mode</li>
+      <li>Blue-light filters</li>
+      <li>Operating-system color filters</li>
+      <li>Ambient lighting</li>
+      <li>Display technology</li>
+    </ul>
+
+    <p>
+      For this reason, online color testing should be treated as screening
+      rather than a diagnostic color vision examination.
+    </p>
+  </section>
+
+  <section>
+    <h2>Screen calibration and physical size limitations</h2>
+
+    <p>
+      Browsers do not always provide a reliable measurement of the true
+      physical size of a display.
+    </p>
+
+    <p>
+      Differences in monitor size, device pixel density, operating-system
+      scaling, browser zoom, and display configuration can influence the
+      physical size of letters shown on screen.
+    </p>
+
+    <div class="warning">
+      PeekVision currently provides a browser-based screening estimate and
+      should not be considered equivalent to a calibrated clinical visual
+      acuity chart.
+    </div>
+
+    <p>
+      Future versions may incorporate additional physical screen calibration
+      methods to improve consistency across devices.
+    </p>
+  </section>
+
+  <section>
+    <h2>Testing environment</h2>
+
+    <p>
+      For more consistent results:
+    </p>
+
+    <ol>
+      <li>Use a well-lit room.</li>
+      <li>Avoid glare and reflections on the display.</li>
+      <li>Keep the browser zoom at its normal setting.</li>
+      <li>Follow the specified viewing distance.</li>
+      <li>Test one eye at a time when instructed.</li>
+      <li>Wear your normal correction when appropriate.</li>
+      <li>Do not memorize or repeatedly rehearse the displayed letters.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Eye-to-eye comparison</h2>
+
+    <p>
+      The PeekVision report compares results from the right and left eyes.
+      A noticeable difference between the two eyes may be worth discussing
+      with an eye-care professional, particularly when the difference is
+      persistent or accompanied by symptoms.
+    </p>
+
+    <p>
+      The comparison is a screening aid only and does not establish a diagnosis.
+    </p>
+  </section>
+
+  <section>
+    <h2>What PeekVision can help identify</h2>
+
+    <p>
+      PeekVision may help a user recognize that:
+    </p>
+
+    <ul>
+      <li>Visual acuity appears reduced under the test conditions</li>
+      <li>One eye performs differently from the other</li>
+      <li>Color patterns are difficult to recognize</li>
+      <li>A professional eye examination may be appropriate</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What PeekVision cannot diagnose</h2>
+
+    <p>
+      PeekVision does not diagnose:
+    </p>
+
+    <ul>
+      <li>Myopia, hyperopia, or astigmatism</li>
+      <li>Glaucoma</li>
+      <li>Cataracts</li>
+      <li>Retinal disease</li>
+      <li>Macular degeneration</li>
+      <li>Diabetic eye disease</li>
+      <li>Neurologic causes of vision loss</li>
+      <li>Color vision deficiency as a formal clinical diagnosis</li>
+      <li>Any other eye or medical condition</li>
+    </ul>
+
+    <p>
+      A comprehensive eye examination may include refraction,
+      slit-lamp examination, retinal examination, intraocular pressure,
+      visual field testing, binocular vision testing, and other procedures
+      that cannot be performed by PeekVision.
+    </p>
+  </section>
+
+  <section>
+    <h2>When to seek professional eye care</h2>
+
+    <p>
+      Consider arranging an eye examination if:
+    </p>
+
+    <ul>
+      <li>Your vision screening result is reduced</li>
+      <li>Your two eyes differ noticeably</li>
+      <li>Your vision has changed over time</li>
+      <li>You have difficulty seeing despite normal screening results</li>
+      <li>You have concerns about color perception</li>
+      <li>You are due for a routine eye examination</li>
+    </ul>
+
+    <div class="warning">
+      Sudden vision loss, severe eye pain, eye injury, new flashes,
+      a sudden increase in floaters, or a curtain-like shadow in vision
+      may require prompt professional evaluation.
+    </div>
+  </section>
+
+  <section>
+    <h2>Privacy-focused browser screening</h2>
+
+    <p>
+      PeekVision is designed to perform the current screening experience
+      through the browser without requiring users to create an account.
+    </p>
+
+    <p>
+      Voice features may require microphone permission when used.
+      Users can choose manual controls instead of voice responses.
+    </p>
+
+    <p>
+      See the PeekVision Privacy Policy for additional information.
+    </p>
+
+    <a class="button primary" href="/privacy.html">
+      Read Privacy Policy
+    </a>
+  </section>
+
+  <section>
+    <h2>Learn more or start a screening</h2>
+
+    <p>
+      You can continue with the appropriate PeekVision resource:
+    </p>
+
+    <ul>
+      <li>
+        <a href="/online-eye-test.html">Free Online Eye Test</a>
+      </li>
+      <li>
+        <a href="/visual-acuity-test.html">Visual Acuity Test</a>
+      </li>
+      <li>
+        <a href="/accessible-vision-test.html">Accessible Vision Test</a>
+      </li>
+      <li>
+        <a href="/color-vision-test.html">Color Vision Test</a>
+      </li>
+      <li>
+        <a href="/20-20-vision.html">What Is 20/20 Vision?</a>
+      </li>
+    </ul>
+
+    <a class="button primary" href="/">
+      Start PeekVision
+    </a>
+  </section>
+
+  <section>
+    <h2>Important disclaimer</h2>
+
+    <p>
+      PeekVision provides informational screening only.
+      Results should not be interpreted as a medical diagnosis,
+      prescription, or certification of visual fitness.
+    </p>
+
+    <p>
+      If you have concerns about your eyesight or eye health,
+      consult a qualified optometrist, ophthalmologist, or other
+      appropriate healthcare professional.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <p>
+    © 2026 PeekVision.io
+    ·
+    <a href="/">Home</a>
+    ·
+    <a href="/privacy.html">Privacy</a>
+    ·
+    <a href="/terms.html">Terms</a>
+  </p>
+</footer>
+
+</body>
+</html>

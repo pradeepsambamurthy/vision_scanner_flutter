@@ -587,6 +587,17 @@ class _HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final seoButtonStyle = OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Colors.black.withOpacity(0.35),
+          side: BorderSide(
+            color: Colors.white.withOpacity(0.55),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+      );
     final text =
         Theme.of(context).textTheme;
 
@@ -748,11 +759,13 @@ const Text(
 
 const SizedBox(height: 10),
 
+
 Wrap(
   spacing: 10,
   runSpacing: 10,
   children: [
     OutlinedButton.icon(
+      style: seoButtonStyle,
       onPressed: () {
         launchUrl(
           Uri.parse(
@@ -767,6 +780,7 @@ Wrap(
     ),
 
     OutlinedButton.icon(
+      style: seoButtonStyle,
       onPressed: () {
         launchUrl(
           Uri.parse(
@@ -781,6 +795,7 @@ Wrap(
     ),
 
     OutlinedButton.icon(
+      style: seoButtonStyle,
       onPressed: () {
         launchUrl(
           Uri.parse(
@@ -797,6 +812,7 @@ Wrap(
 ),
 
 OutlinedButton.icon(
+  style: seoButtonStyle,
   onPressed: () async {
     final uri = Uri.parse(
       'https://www.peekvision.io/20-20-vision.html',
@@ -812,6 +828,7 @@ OutlinedButton.icon(
 ),
 
 OutlinedButton.icon(
+  style: seoButtonStyle,
   onPressed: () async {
     final uri = Uri.parse(
       'https://www.peekvision.io/color-vision-test.html',
@@ -824,6 +841,22 @@ OutlinedButton.icon(
   },
   icon: const Icon(Icons.palette_outlined),
   label: const Text('Color Vision Test'),
+),
+
+OutlinedButton.icon(
+  style: seoButtonStyle,
+  onPressed: () async {
+    final uri = Uri.parse(
+      'https://www.peekvision.io/methodology.html',
+    );
+
+    await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+  },
+  icon: const Icon(Icons.science_outlined),
+  label: const Text('How PeekVision Works'),
 ),
 const SizedBox(height: 16),
 
