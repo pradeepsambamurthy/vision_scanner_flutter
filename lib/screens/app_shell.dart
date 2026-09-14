@@ -735,6 +735,68 @@ class _HomeContent extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 20),
+
+const Text(
+  'Learn More About Vision Screening',
+  style: TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.w800,
+    color: Colors.white,
+  ),
+),
+
+const SizedBox(height: 10),
+
+Wrap(
+  spacing: 10,
+  runSpacing: 10,
+  children: [
+    OutlinedButton.icon(
+      onPressed: () {
+        launchUrl(
+          Uri.parse(
+            'https://www.peekvision.io/online-eye-test.html',
+          ),
+        );
+      },
+      icon: const Icon(Icons.open_in_new),
+      label: const Text(
+        'Free Online Eye Test',
+      ),
+    ),
+
+    OutlinedButton.icon(
+      onPressed: () {
+        launchUrl(
+          Uri.parse(
+            'https://www.peekvision.io/visual-acuity-test.html',
+          ),
+        );
+      },
+      icon: const Icon(Icons.open_in_new),
+      label: const Text(
+        'Visual Acuity Test',
+      ),
+    ),
+
+    OutlinedButton.icon(
+      onPressed: () {
+        launchUrl(
+          Uri.parse(
+            'https://www.peekvision.io/accessible-vision-test.html',
+          ),
+        );
+      },
+      icon: const Icon(Icons.open_in_new),
+      label: const Text(
+        'Accessible Vision Test',
+      ),
+    ),
+  ],
+),
+
+const SizedBox(height: 16),
 
             const SizedBox(height: 12),
 
