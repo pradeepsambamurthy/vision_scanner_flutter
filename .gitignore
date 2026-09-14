@@ -121,3 +121,5 @@ app.*.symbols
 
 ios/Runner/GoogleService-Info.plist
 macos/Runner/GoogleService-Info.plist
+
+.DS_Store
