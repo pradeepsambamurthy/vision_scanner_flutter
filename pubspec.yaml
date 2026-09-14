@@ -34,6 +34,8 @@ dependencies:
   # Social sign-in
   cupertino_icons: ^1.0.8
   url_launcher: ^6.3.2
+  flutter_tts: ^4.2.5
+  speech_to_text: ^7.4.0
 
 dev_dependencies:
   flutter_test:

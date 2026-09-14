@@ -119,20 +119,53 @@ class AcuityResult {
     this.testDistanceCm = 300,
   });
 
-  /// Snellen denominator.
+  // ================================================================
+  // STANDARD DISPLAY LABELS
+  // ================================================================
+
+  /// Returns the standard Snellen-style denominator for the
+  /// logMAR levels used by PeekVision.
   ///
-  /// Examples:
-  /// logMAR 0.0  -> 20
-  /// logMAR 0.3  -> about 40
-  /// logMAR -0.3 -> about 10
+  /// This avoids browser-report labels such as 20/399 or 20/252.
   int get denominator {
+    if (_isLevel(1.3)) return 400;
+    if (_isLevel(1.2)) return 320;
+    if (_isLevel(1.1)) return 250;
+    if (_isLevel(1.0)) return 200;
+    if (_isLevel(0.9)) return 160;
+    if (_isLevel(0.8)) return 125;
+    if (_isLevel(0.7)) return 100;
+    if (_isLevel(0.6)) return 80;
+    if (_isLevel(0.5)) return 63;
+    if (_isLevel(0.4)) return 50;
+    if (_isLevel(0.3)) return 40;
+    if (_isLevel(0.2)) return 32;
+    if (_isLevel(0.1)) return 25;
+    if (_isLevel(0.0)) return 20;
+    if (_isLevel(-0.1)) return 16;
+    if (_isLevel(-0.2)) return 13;
+    if (_isLevel(-0.3)) return 10;
+    if (_isLevel(-0.4)) return 8;
+    if (_isLevel(-0.5)) return 6;
+    if (_isLevel(-0.6)) return 5;
+    if (_isLevel(-0.7)) return 4;
+
+    // Fallback if a future test introduces another logMAR value.
     return (20 * math.pow(10, logMAR)).round();
   }
 
-  /// Approximate Snellen screening level.
+  bool _isLevel(double value) {
+    return (logMAR - value).abs() < 0.01;
+  }
+
+  /// Standardized Snellen-style screening label.
   String get snellen {
     return '20/$denominator';
   }
+
+  // ================================================================
+  // EYE LABEL
+  // ================================================================
 
   String get eyeLabel {
     switch (eye) {
@@ -147,6 +180,10 @@ class AcuityResult {
     }
   }
 
+  // ================================================================
+  // TEST DISTANCE
+  // ================================================================
+
   String get testDistanceLabel {
     if (testDistanceCm >= 250) {
       return 'Approximately 10 ft / 3 m';
@@ -160,6 +197,10 @@ class AcuityResult {
     return '${testDistanceCm.toStringAsFixed(0)} cm';
   }
 
+  // ================================================================
+  // SCREENING LEVEL
+  // ================================================================
+
   String get screeningLevel {
     if (belowRange) {
       return 'Below measurable screening range';
@@ -167,6 +208,10 @@ class AcuityResult {
 
     return snellen;
   }
+
+  // ================================================================
+  // SIMPLE INTERPRETATION
+  // ================================================================
 
   /// Simple description of the result.
   ///
@@ -177,32 +222,40 @@ class AcuityResult {
       return 'Vision was below the range measured by this screening.';
     }
 
+    if (denominator >= 320) {
+      return 'Severe reduction compared with normal 20/20 visual acuity.';
+    }
+
+    if (denominator >= 200) {
+      return 'Significant reduction compared with normal 20/20 visual acuity.';
+    }
+
     if (denominator >= 125) {
-      return 'Significant reduction compared with the standard 20/20 reference.';
+      return 'Marked reduction compared with normal 20/20 visual acuity.';
     }
 
     if (denominator >= 80) {
-      return 'Marked reduction compared with the standard 20/20 reference.';
+      return 'Moderate reduction compared with normal 20/20 visual acuity.';
     }
 
     if (denominator >= 50) {
-      return 'Moderate reduction compared with the standard 20/20 reference.';
+      return 'Reduced visual acuity compared with normal 20/20 vision.';
     }
 
     if (denominator >= 30) {
-      return 'Mild reduction compared with the standard 20/20 reference.';
+      return 'Mild reduction compared with normal 20/20 visual acuity.';
     }
 
     if (denominator == 25) {
-      return 'Slightly below the standard 20/20 reference.';
+      return 'Slightly below normal 20/20 visual acuity.';
     }
 
     if (denominator == 20) {
-      return 'At the standard 20/20 reference level.';
+      return 'At normal 20/20 visual acuity.';
     }
 
     if (denominator >= 13) {
-      return 'Better than the standard 20/20 screening level.';
+      return 'Better than normal 20/20 visual acuity during this screening.';
     }
 
     if (denominator >= 8) {
