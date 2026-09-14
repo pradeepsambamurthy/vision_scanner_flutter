@@ -28,9 +28,6 @@ dependencies:
   printing: ^5.13.4
 
   
-  firebase_core: ^2.25.4
-  cloud_firestore: ^4.15.9
-
   # Social sign-in
   cupertino_icons: ^1.0.8
   url_launcher: ^6.3.2
