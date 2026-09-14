@@ -1313,7 +1313,7 @@ class _ContactTab extends StatelessWidget {
   Future<void> _openEmail() async {
     final Uri emailUri =
         Uri.parse(
-      'mailto:pradeepkumar.sambamurthy@gmail.com'
+      'mailto:peekvision.eyetest@gmail.com'
       '?subject=PeekVision%20Feedback'
       '&body=Hello%20PeekVision%20Team,%0A%0A',
     );
@@ -1451,7 +1451,7 @@ class _ContactTab extends StatelessWidget {
                     ),
 
                     label: const Text(
-                      'pradeepkumar.sambamurthy@gmail.com',
+                      'peekvision.eyetest@gmail.com',
 
                       style:
                           TextStyle(
