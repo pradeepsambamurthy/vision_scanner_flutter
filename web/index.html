@@ -1,27 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Primary SEO -->
+  <!-- ========================================================= -->
+  <!-- PRIMARY SEO -->
+  <!-- ========================================================= -->
+
   <title>Free Online Eye Test & Vision Screening | PeekVision.io</title>
 
   <meta
     name="description"
-    content="Use PeekVision.io for free online preliminary vision screening and visual acuity testing from your computer. No account required."
+    content="Take a free online eye test with PeekVision.io. Screen distance vision, near vision, visual acuity, color vision, and use an accessible large-letter voice-assisted vision test."
   >
 
-  <meta name="robots" content="index, follow">
+  <meta
+    name="keywords"
+    content="online eye test, free eye test, vision test online, visual acuity test, distance vision test, near vision test, color vision test, 20/20 vision test, accessible vision test"
+  >
+
+  <meta name="robots" content="index, follow, max-image-preview:large">
 
   <link
     rel="canonical"
     href="https://www.peekvision.io/"
   >
 
-  <!-- Open Graph / LinkedIn / Facebook -->
+  <!-- ========================================================= -->
+  <!-- OPEN GRAPH -->
+  <!-- ========================================================= -->
+
   <meta property="og:type" content="website">
 
   <meta
@@ -31,7 +43,7 @@
 
   <meta
     property="og:description"
-    content="Free online preliminary vision screening and visual acuity testing from your computer. No account required."
+    content="Free online preliminary vision screening for distance vision, near vision, visual acuity, color vision, and accessible voice-assisted testing."
   >
 
   <meta
@@ -49,11 +61,26 @@
     content="https://www.peekvision.io/images/peekvision-social-preview.png"
   >
 
+  <meta
+    property="og:image:secure_url"
+    content="https://www.peekvision.io/images/peekvision-social-preview.png"
+  >
+
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:type" content="image/png">
 
-  <!-- Twitter / X -->
+  <meta
+    property="og:image:alt"
+    content="PeekVision.io free online eye test and vision screening"
+  >
+
+  <meta property="og:locale" content="en_US">
+
+  <!-- ========================================================= -->
+  <!-- TWITTER / X -->
+  <!-- ========================================================= -->
+
   <meta
     name="twitter:card"
     content="summary_large_image"
@@ -66,7 +93,7 @@
 
   <meta
     name="twitter:description"
-    content="Free online preliminary vision screening and visual acuity testing from your computer."
+    content="Free online visual acuity, distance vision, near vision, color vision, and accessible voice-assisted vision screening."
   >
 
   <meta
@@ -74,12 +101,25 @@
     content="https://www.peekvision.io/images/peekvision-social-preview.png"
   >
 
-  <!-- iOS meta tags & icons -->
+  <meta
+    name="twitter:image:alt"
+    content="PeekVision.io free online eye test and vision screening"
+  >
+
+  <!-- ========================================================= -->
+  <!-- MOBILE / PWA -->
+  <!-- ========================================================= -->
+
   <meta name="mobile-web-app-capable" content="yes">
 
   <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
     name="apple-mobile-web-app-status-bar-style"
-    content="black"
+    content="black-translucent"
   >
 
   <meta
@@ -87,38 +127,75 @@
     content="PeekVision.io"
   >
 
+  <meta
+    name="theme-color"
+    content="#0B3B7A"
+  >
+
   <link
     rel="apple-touch-icon"
     href="icons/Icon-192.png"
   >
 
-  <!-- Favicon -->
   <link
     rel="icon"
     type="image/png"
     href="favicon.png"
   >
 
-  <!-- Manifest -->
   <link
     rel="manifest"
     href="manifest.json"
   >
 
-  <!-- Structured Data -->
+  <!-- ========================================================= -->
+  <!-- STRUCTURED DATA: WEBSITE -->
+  <!-- ========================================================= -->
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": "https://www.peekvision.io/#website",
     "name": "PeekVision.io",
     "url": "https://www.peekvision.io/",
-    "description": "Free online preliminary vision screening and visual acuity testing."
+    "description": "Free browser-based preliminary vision screening including distance vision, near vision, visual acuity, color vision, and accessible voice-assisted testing.",
+    "inLanguage": "en-US"
+  }
+  </script>
+
+  <!-- ========================================================= -->
+  <!-- STRUCTURED DATA: WEB APPLICATION -->
+  <!-- ========================================================= -->
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "@id": "https://www.peekvision.io/#app",
+    "name": "PeekVision.io",
+    "url": "https://www.peekvision.io/",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires a modern web browser with JavaScript enabled",
+    "description": "A free browser-based preliminary vision screening application for visual acuity, distance vision, near vision, color vision, and accessible large-letter testing.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "isAccessibleForFree": true,
+    "inLanguage": "en-US"
   }
   </script>
 
 </head>
 
 <body>
+  <noscript>
+    PeekVision.io requires JavaScript to run the online vision screening application.
+  </noscript>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
