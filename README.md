@@ -18,6 +18,7 @@ Live site: https://www.peekvision.io/
 - Browser-based reports
 - No account required
 
+
 ## Screenshots
 
 ### Home
@@ -95,9 +96,21 @@ Privacy policy:
 
 https://www.peekvision.io/privacy.html
 
+## Methodology
+
+Learn how PeekVision performs browser-based visual acuity and color vision screening, including accessibility considerations and important limitations:
+
+https://www.peekvision.io/methodology.html
+
 ## Website
 
 https://www.peekvision.io/
+
+## Featured Article
+
+I wrote about the accessibility design behind PeekVision:
+
+[Why Online Vision Tests Need Accessibility: Building a Voice-Assisted Eye Screening Experience](https://medium.com/@peekvision.eyetest/why-online-vision-tests-need-accessibility-building-a-voice-assisted-eye-screening-experience-b7ef3ab96c0d)
 
 ## Contact
 
