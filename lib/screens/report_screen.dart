@@ -22,78 +22,16 @@ class ReportBody extends StatelessWidget {
           'No screening report yet.\n\n'
           'Complete a vision or color vision screening to see your report.',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            height: 1.4,
-          ),
+          style: TextStyle(color: Colors.white, fontSize: 16, height: 1.4),
         ),
       );
     }
 
     // ================================================================
-    // RESULT CLASSIFICATION
+    // RESULT HELPERS
     // ================================================================
 
-    String classification(
-      vm.AcuityResult? result,
-    ) {
-      if (result == null) {
-        return 'Not tested';
-      }
-
-      if (result.belowRange) {
-        return 'Below the measurable screening range';
-      }
-
-      final d = result.denominator;
-
-      if (d >= 320) {
-        return 'Severe reduction in visual acuity';
-      }
-
-      if (d >= 200) {
-        return 'Significant reduction in visual acuity';
-      }
-
-      if (d >= 125) {
-        return 'Marked reduction in visual acuity';
-      }
-
-      if (d >= 80) {
-        return 'Moderate reduction in visual acuity';
-      }
-
-      if (d >= 50) {
-        return 'Reduced visual acuity';
-      }
-
-      if (d >= 30) {
-        return 'Mild reduction in visual acuity';
-      }
-
-      if (d == 25) {
-        return 'Slightly below normal 20/20 visual acuity';
-      }
-
-      if (d == 20) {
-        return 'Normal 20/20 visual acuity';
-      }
-
-      if (d >= 13) {
-        return 'Better than 20/20 visual acuity';
-      }
-
-      if (d >= 8) {
-        return 'Very small letters reached';
-      }
-
-      return 'Extremely small letters reached';
-    }
-
-    String comparisonToStandard(
-      vm.AcuityResult? result,
-    ) {
+    String screeningComparison(vm.AcuityResult? result) {
       if (result == null) {
         return 'Not available';
       }
@@ -105,17 +43,55 @@ class ReportBody extends StatelessWidget {
       final d = result.denominator;
 
       if (d > 20) {
-        return 'Below normal 20/20 visual acuity';
+        return 'Below the standard 20/20 reference level';
       }
 
       if (d == 20) {
-        return 'At normal 20/20 visual acuity';
+        return 'At the standard 20/20 reference level';
       }
 
-      return 'Better than normal 20/20 visual acuity';
+      return 'Smaller letters than the standard 20/20 level were readable';
     }
 
-    String simpleMeaning(
+    String classification(vm.AcuityResult? result) {
+      if (result == null) {
+        return 'Not tested';
+      }
+
+      if (result.belowRange) {
+        return 'Largest line was difficult to read';
+      }
+
+      final d = result.denominator;
+
+      if (d >= 50) {
+        return 'Reduced visual acuity in this screening';
+      }
+
+      if (d == 40) {
+        return 'Some reduction compared with 20/20';
+      }
+
+      if (d == 32) {
+        return 'Fairly close to the 20/20 reference';
+      }
+
+      if (d == 25) {
+        return 'Close to the 20/20 reference';
+      }
+
+      if (d == 20) {
+        return 'Reached the standard 20/20 reference level';
+      }
+
+      if (d >= 13) {
+        return 'Smaller-than-20/20 letters were readable';
+      }
+
+      return 'Very small letters were readable';
+    }
+
+    String resultMeaning(
       vm.AcuityResult? result, {
       required String eyeName,
       required String testType,
@@ -125,75 +101,143 @@ class ReportBody extends StatelessWidget {
       }
 
       if (result.belowRange) {
-        return '$eyeName could not read the largest line presented during '
-            'this $testType screening. The result was below the measurable '
-            'range of this online screening. A comprehensive eye examination '
-            'should be considered.';
+        return '$eyeName had difficulty reading even the largest line used '
+            'in this $testType screening. Repeat the test under the recommended '
+            'conditions. If you get a similar result again, consider a '
+            'professional eye examination.';
       }
 
       final d = result.denominator;
-
-      if (d >= 320) {
-        return '$eyeName required very large letters during this $testType '
-            'screening. This represents a substantial reduction in visual '
-            'acuity compared with normal 20/20 vision.';
-      }
-
-      if (d >= 200) {
-        return '$eyeName required much larger letters than the normal 20/20 '
-            'line during this $testType screening. This represents a '
-            'significant reduction in visual acuity.';
-      }
-
-      if (d >= 125) {
-        return '$eyeName showed a marked reduction in $testType visual '
-            'acuity compared with normal 20/20 vision.';
-      }
-
-      if (d >= 80) {
-        return '$eyeName showed a moderate reduction in $testType visual '
-            'acuity during this screening.';
-      }
+      final level = result.screeningLevel;
 
       if (d >= 50) {
-        return '$eyeName showed reduced $testType visual acuity compared '
-            'with normal 20/20 vision.';
+        return '$eyeName could read letters at the $level level, but smaller '
+            'letters became difficult. The standard reference level is 20/20. '
+            'Because the screening stopped before 20/20, your $testType vision '
+            'appeared reduced under these test conditions.';
       }
 
-      if (d >= 30) {
-        return '$eyeName needed somewhat larger letters than the normal '
-            '20/20 line. This represents a mild reduction in $testType '
-            'visual acuity.';
+      if (d == 40) {
+        return '$eyeName could read the 20/40 line but had difficulty with '
+            'smaller letters. This is somewhat below the standard 20/20 '
+            'reference level under these screening conditions.';
+      }
+
+      if (d == 32) {
+        return '$eyeName reached the 20/32 level. This is fairly close to the '
+            'standard 20/20 reference, although smaller letters were still '
+            'difficult to read.';
       }
 
       if (d == 25) {
-        return '$eyeName was slightly below normal 20/20 visual acuity '
-            'during this $testType screening.';
+        return '$eyeName reached the 20/25 level. This is close to the standard '
+            '20/20 reference, with only slight difficulty at smaller letter '
+            'sizes.';
       }
 
       if (d == 20) {
-        return '$eyeName reached normal 20/20 visual acuity during this '
-            '$testType screening.';
+        return '$eyeName reached the standard 20/20 reference level. '
+            'The next smaller letters became difficult. 20/20 is a standard '
+            'reference level and does not mean that it is the smallest possible '
+            'line a person can read.';
       }
 
-      if (d >= 13) {
-        return '$eyeName was able to read letters smaller than the normal '
-            '20/20 line. This represents better-than-20/20 performance '
-            'during this browser screening.';
+      if (d == 16) {
+        return '$eyeName was able to read letters smaller than the standard '
+            '20/20 reference level. This suggests strong visual acuity under '
+            'the current screening conditions.';
       }
 
-      if (d >= 8) {
+      if (d == 13) {
+        return '$eyeName was able to read noticeably smaller letters than the '
+            'standard 20/20 reference level. This suggests very good visual '
+            'acuity under the current screening conditions.';
+      }
+
+      if (d == 10) {
         return '$eyeName was able to read very small letters beyond the '
-            'normal 20/20 level. These results are sensitive to screen '
-            'calibration and exact viewing distance.';
+            'standard 20/20 reference level. This represents strong screening '
+            'performance, although results at this size are more sensitive to '
+            'screen size, scaling and viewing distance.';
       }
 
-      return '$eyeName reached an extremely small letter level in this '
-          'browser screening. Because results this small are highly affected '
-          'by physical screen size, display scaling and exact viewing '
-          'distance, this should be treated as the smallest screening level '
-          'reached rather than a clinically confirmed ${result.snellen} '
-          'measurement.';
+      if (d == 8) {
+        return '$eyeName reached a very small letter level during this browser '
+            'screening. Because results this small depend strongly on physical '
+            'screen size, display scaling and viewing distance, this should be '
+            'treated as the smallest screening level reached rather than a '
+            'clinically confirmed measurement.';
+      }
+
+      if (d == 6) {
+        return '$eyeName reached an extremely small letter level. This is well '
+            'beyond the standard 20/20 reference, but browser calibration can '
+            'strongly affect results at this size.';
+      }
+
+      if (d == 5) {
+        return '$eyeName reached an extremely small letter level during this '
+            'screening. Interpret this cautiously because physical screen size '
+            'and exact viewing distance have a large effect at this level.';
+      }
+
+      if (d <= 4) {
+        return '$eyeName reached the smallest letter level currently presented '
+            'by PeekVision. This shows very strong performance under the test '
+            'conditions, but it should not be interpreted as a clinically '
+            'confirmed $level measurement without proper display calibration.';
+      }
+
+      return '$eyeName reached the $level screening level.';
+    }
+
+    // ================================================================
+    // CORRECTION-SPECIFIC GUIDANCE
+    // ================================================================
+
+    bool isUsingCorrection(vm.AcuityResult? result) {
+      if (result == null) {
+        return false;
+      }
+
+      return result.correction != vm.VisionCorrection.none;
+    }
+
+    bool isBelowTwentyTwenty(vm.AcuityResult? result) {
+      if (result == null) {
+        return false;
+      }
+
+      if (result.belowRange) {
+        return true;
+      }
+
+      return result.denominator > 20;
+    }
+
+    String correctionGuidance(vm.AcuityResult? result) {
+      if (result == null) {
+        return '';
+      }
+
+      if (!isBelowTwentyTwenty(result)) {
+        return 'No obvious reduction in visual acuity was seen at the standard '
+            '20/20 reference level under these screening conditions. This '
+            'screening does not replace a comprehensive eye examination.';
+      }
+
+      if (isUsingCorrection(result)) {
+        return 'You completed this screening while using your usual vision '
+            'correction. Because the result was below the standard 20/20 '
+            'reference level, an eye examination can check whether your current '
+            'glasses or contact lens prescription may need to be updated. '
+            'Other causes of reduced vision are also possible.';
+      }
+
+      return 'You completed this screening without glasses or contact lenses. '
+          'A refractive error may be one possible reason for reduced vision. '
+          'A professional eye examination and refraction can determine whether '
+          'glasses or contact lenses could improve your vision.';
     }
 
     // ================================================================
@@ -205,65 +249,131 @@ class ReportBody extends StatelessWidget {
       vm.AcuityResult? left, {
       required String testType,
     }) {
-      if (right == null ||
-          left == null) {
+      if (right == null || left == null) {
         return 'A right-versus-left eye comparison is not available.';
       }
 
-      if (right.belowRange &&
-          left.belowRange) {
-        return 'Both eyes were below the range measured by this $testType '
-            'screening.';
+      if (right.belowRange && left.belowRange) {
+        return 'Both eyes had difficulty with the largest line used in this '
+            '$testType screening.';
       }
 
       if (right.belowRange) {
         return 'The RIGHT eye (OD) performed weaker than the LEFT eye (OS) '
-            'in this $testType screening.';
+            'during this $testType screening.';
       }
 
       if (left.belowRange) {
         return 'The LEFT eye (OS) performed weaker than the RIGHT eye (OD) '
-            'in this $testType screening.';
+            'during this $testType screening.';
       }
 
-      final rightD =
-          right.denominator;
-      final leftD =
-          left.denominator;
+      final rightD = right.denominator;
+      final leftD = left.denominator;
 
-      if ((rightD - leftD)
-              .abs() <=
-          5) {
+      if ((rightD - leftD).abs() <= 5) {
         return 'The RIGHT eye (OD) and LEFT eye (OS) produced similar '
             '$testType screening results.';
       }
 
-      if (rightD >
-          leftD) {
+      if (rightD > leftD) {
         return 'The RIGHT eye (OD) performed weaker than the LEFT eye (OS) '
-            'in this $testType screening.';
+            'during this $testType screening.';
       }
 
       return 'The LEFT eye (OS) performed weaker than the RIGHT eye (OD) '
-          'in this $testType screening.';
+          'during this $testType screening.';
+    }
+
+    // ================================================================
+    // CONCLUSION FOR A TEST
+    // ================================================================
+
+    String testConclusion(
+      vm.AcuityResult? right,
+      vm.AcuityResult? left,
+      vm.AcuityResult? both, {
+      required String testType,
+    }) {
+      final results = [
+        if (right != null) right,
+        if (left != null) left,
+        if (both != null) both,
+      ];
+
+      if (results.isEmpty) {
+        return 'No $testType visual acuity result is available.';
+      }
+
+      if (results.any((r) => r.belowRange)) {
+        return 'At least one eye had difficulty reading the largest line used '
+            'in the $testType screening. Repeat the screening under the '
+            'recommended conditions. If you get a similar result again, '
+            'consider a professional eye examination.';
+      }
+
+      final worst = results.reduce(
+        (a, b) => a.denominator > b.denominator ? a : b,
+      );
+
+      final d = worst.denominator;
+
+      if (d >= 50) {
+        return 'Your $testType screening showed that at least one tested eye '
+            'could read its recorded line but had difficulty with smaller '
+            'letters before reaching the standard 20/20 reference level. '
+            'This suggests reduced $testType visual acuity under the test '
+            'conditions.';
+      }
+
+      if (d == 40) {
+        return 'Your $testType screening was somewhat below the standard '
+            '20/20 reference level in at least one tested eye. If this result '
+            'is repeatable, consider a professional eye examination.';
+      }
+
+      if (d == 32) {
+        return 'Your $testType screening was fairly close to the standard '
+            '20/20 reference level, although at least one eye had difficulty '
+            'with smaller letters.';
+      }
+
+      if (d == 25) {
+        return 'Your $testType screening was close to the standard 20/20 '
+            'reference level, with only slight difficulty at smaller letter '
+            'sizes.';
+      }
+
+      if (d == 20) {
+        return 'Your $testType vision reached the standard 20/20 reference '
+            'level under the screening conditions. Remember that 20/20 is a '
+            'reference level, not the smallest possible line a person can read.';
+      }
+
+      if (d >= 13) {
+        return 'Your $testType screening showed that letters smaller than the '
+            'standard 20/20 reference level were readable under the current '
+            'test conditions.';
+      }
+
+      return 'Your $testType screening reached very small letter sizes beyond '
+          'the standard 20/20 reference level. Results at these sizes should '
+          'be interpreted cautiously because screen calibration and viewing '
+          'distance can significantly affect them.';
     }
 
     // ================================================================
     // COLOR VISION
     // ================================================================
 
-    final cb =
-        data.colorBlindness;
+    final cb = data.colorBlindness;
 
-    String cbText(
-      String key,
-    ) {
+    String cbText(String key) {
       if (cb == null) {
         return '—';
       }
 
-      final value =
-          cb[key];
+      final value = cb[key];
 
       if (value == null) {
         return '—';
@@ -277,26 +387,20 @@ class ReportBody extends StatelessWidget {
         return 0;
       }
 
-      final value =
-          cb['accuracy'];
+      final value = cb['accuracy'];
 
       if (value is num) {
         return value.toDouble();
       }
 
       if (value is String) {
-        return double.tryParse(
-              value,
-            ) ??
-            0;
+        return double.tryParse(value) ?? 0;
       }
 
       return 0;
     }
 
-    final cbPct =
-        (cbAccuracy() * 100)
-            .round();
+    final cbPct = (cbAccuracy() * 100).round();
 
     String colorVisionSummary() {
       if (!hasColorVision) {
@@ -321,258 +425,113 @@ class ReportBody extends StatelessWidget {
     }
 
     // ================================================================
-    // OVERALL IMPRESSION
+    // OVERALL CONCLUSION
     // ================================================================
 
     String overallImpression() {
-      final parts =
-          <String>[];
+      final parts = <String>[];
 
       if (hasDistance) {
-        final r =
-            data.distanceRight;
-        final l =
-            data.distanceLeft;
-        final b =
-            data.distanceBoth;
-
-        final values = [
-          if (r != null &&
-              !r.belowRange)
-            r.denominator,
-          if (l != null &&
-              !l.belowRange)
-            l.denominator,
-          if (b != null &&
-              !b.belowRange)
-            b.denominator,
-        ];
-
-        final anyBelowRange =
-            (r?.belowRange ?? false) ||
-                (l?.belowRange ??
-                    false) ||
-                (b?.belowRange ??
-                    false);
-
-        if (anyBelowRange) {
-          parts.add(
-            'At least one distance-vision result was below the range measured '
-            'by this screening.',
-          );
-        } else if (values.isNotEmpty) {
-          final worst =
-              values.reduce(
-            (a, b) =>
-                a > b ? a : b,
-          );
-
-          if (worst <= 20) {
-            parts.add(
-              'Distance visual acuity reached normal 20/20 vision or better '
-              'in the tested eyes.',
-            );
-          } else if (worst <=
-              40) {
-            parts.add(
-              'Distance visual acuity showed a mild reduction compared with '
-              'normal 20/20 vision in one or more tested eyes.',
-            );
-          } else if (worst <=
-              100) {
-            parts.add(
-              'Distance visual acuity showed a moderate reduction compared '
-              'with normal 20/20 vision in one or more tested eyes.',
-            );
-          } else {
-            parts.add(
-              'Distance visual acuity showed a significant reduction compared '
-              'with normal 20/20 vision in one or more tested eyes.',
-            );
-          }
-        }
+        parts.add(
+          testConclusion(
+            data.distanceRight,
+            data.distanceLeft,
+            data.distanceBoth,
+            testType: 'distance',
+          ),
+        );
       }
 
       if (hasNear) {
-        final r =
-            data.nearRight;
-        final l =
-            data.nearLeft;
-        final b =
-            data.nearBoth;
-
-        final values = [
-          if (r != null &&
-              !r.belowRange)
-            r.denominator,
-          if (l != null &&
-              !l.belowRange)
-            l.denominator,
-          if (b != null &&
-              !b.belowRange)
-            b.denominator,
-        ];
-
-        final anyBelowRange =
-            (r?.belowRange ?? false) ||
-                (l?.belowRange ??
-                    false) ||
-                (b?.belowRange ??
-                    false);
-
-        if (anyBelowRange) {
-          parts.add(
-            'At least one near-vision result was below the range measured '
-            'by this screening.',
-          );
-        } else if (values.isNotEmpty) {
-          final worst =
-              values.reduce(
-            (a, b) =>
-                a > b ? a : b,
-          );
-
-          if (worst <= 20) {
-            parts.add(
-              'Near visual acuity reached the normal screening reference '
-              'or better in the tested eyes.',
-            );
-          } else if (worst <=
-              40) {
-            parts.add(
-              'Near visual acuity showed a mild reduction in one or more '
-              'tested eyes.',
-            );
-          } else {
-            parts.add(
-              'Near visual acuity showed a noticeable reduction in one or '
-              'more tested eyes.',
-            );
-          }
-        }
+        parts.add(
+          testConclusion(
+            data.nearRight,
+            data.nearLeft,
+            data.nearBoth,
+            testType: 'near',
+          ),
+        );
       }
 
       if (hasColorVision) {
-        parts.add(
-          colorVisionSummary(),
-        );
+        parts.add(colorVisionSummary());
       }
 
       if (parts.isEmpty) {
         return 'Screening results are available below.';
       }
 
-      return parts.join(
-        '\n\n',
-      );
+      return parts.join('\n\n');
     }
 
     // ================================================================
     // UI HELPERS
     // ================================================================
 
-    Widget section(
-      String title,
-      Widget child,
-    ) {
+    Widget section(String title, Widget child) {
       return Container(
-        margin:
-            const EdgeInsets.only(
-          bottom: 16,
-        ),
-        decoration:
-            BoxDecoration(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius:
-              BorderRadius.circular(
-            14,
-          ),
+          borderRadius: BorderRadius.circular(14),
         ),
-        child:
-            Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.stretch,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              padding:
-                  const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 13,
-              ),
-              decoration:
-                  BoxDecoration(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+              decoration: BoxDecoration(
                 color: Theme.of(
                   context,
-                )
-                    .colorScheme
-                    .primaryContainer
-                    .withOpacity(
-                      .35,
-                    ),
-                borderRadius:
-                    const BorderRadius.vertical(
-                  top:
-                      Radius.circular(
-                    14,
-                  ),
+                ).colorScheme.primaryContainer.withOpacity(.35),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(14),
                 ),
               ),
-              child:
-                  Text(
+              child: Text(
                 title,
-                style:
-                    const TextStyle(
+                style: const TextStyle(
                   fontSize: 17,
-                  fontWeight:
-                      FontWeight.w800,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.all(
-                16,
-              ),
-              child:
-                  child,
-            ),
+            Padding(padding: const EdgeInsets.all(16), child: child),
           ],
         ),
       );
     }
 
-    Widget infoRow(
-      String label,
-      String value,
-    ) {
+    Widget infoRow(String label, String value) {
+      final isMobile = MediaQuery.of(context).size.width < 600;
+
+      if (isMobile) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+              const SizedBox(height: 2),
+              Text(value),
+            ],
+          ),
+        );
+      }
+
       return Padding(
-        padding:
-            const EdgeInsets.only(
-          bottom: 7,
-        ),
-        child:
-            Row(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+        padding: const EdgeInsets.only(bottom: 7),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               width: 170,
-              child:
-                  Text(
+              child: Text(
                 label,
-                style:
-                    const TextStyle(
-                  fontWeight:
-                      FontWeight.w700,
-                ),
+                style: const TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
-            Expanded(
-              child:
-                  Text(
-                value,
-              ),
-            ),
+            Expanded(child: Text(value)),
           ],
         ),
       );
@@ -583,130 +542,79 @@ class ReportBody extends StatelessWidget {
       required vm.AcuityResult? result,
       required String testType,
     }) {
+      final eyeName = title.contains('Right')
+          ? 'Your RIGHT eye'
+          : title.contains('Left')
+          ? 'Your LEFT eye'
+          : 'With BOTH eyes open';
+
       return Container(
-        width:
-            double.infinity,
-        margin:
-            const EdgeInsets.only(
-          bottom: 12,
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F8FB),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE4E7EC)),
         ),
-        padding:
-            const EdgeInsets.all(
-          14,
-        ),
-        decoration:
-            BoxDecoration(
-          color:
-              const Color(
-            0xFFF7F8FB,
-          ),
-          borderRadius:
-              BorderRadius.circular(
-            12,
-          ),
-          border:
-              Border.all(
-            color:
-                const Color(
-              0xFFE4E7EC,
-            ),
-          ),
-        ),
-        child:
-            Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               title,
-              style:
-                  const TextStyle(
-                fontSize: 16,
-                fontWeight:
-                    FontWeight.w800,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
             ),
 
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
 
             Text(
-              result?.screeningLevel ??
-                  'Not tested',
-              style:
-                  const TextStyle(
+              result?.screeningLevel ?? 'Not tested',
+              style: const TextStyle(
                 fontSize: 22,
-                fontWeight:
-                    FontWeight.w900,
-                color:
-                    Color(
-                  0xFF174BAE,
-                ),
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF174BAE),
               ),
             ),
 
-            const SizedBox(
-              height: 8,
-            ),
+            const SizedBox(height: 10),
 
-            infoRow(
-              'Classification:',
-              classification(
-                result,
-              ),
-            ),
+            infoRow('Screening level:', result?.screeningLevel ?? 'Not tested'),
 
-            infoRow(
-              'Normal reference:',
-              '20/20',
-            ),
+            infoRow('Standard reference:', '20/20'),
 
-            infoRow(
-              'Comparison:',
-              comparisonToStandard(
-                result,
-              ),
-            ),
+            infoRow('How this compares:', screeningComparison(result)),
 
-            const SizedBox(
-              height: 5,
-            ),
+            infoRow('Summary:', classification(result)),
+
+            const SizedBox(height: 8),
 
             const Text(
               'What this means',
-              style:
-                  TextStyle(
-                fontWeight:
-                    FontWeight.w800,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w800),
             ),
 
-            const SizedBox(
-              height: 5,
-            ),
+            const SizedBox(height: 5),
 
             Text(
-              simpleMeaning(
-                result,
-                eyeName:
-                    title.contains(
-                      'Right',
-                    )
-                        ? 'Your RIGHT eye'
-                        : title.contains(
-                            'Left',
-                          )
-                            ? 'Your LEFT eye'
-                            : 'Your combined vision with BOTH eyes',
-                testType:
-                    testType,
-              ),
-              style:
-                  const TextStyle(
-                height: 1.45,
-              ),
+              resultMeaning(result, eyeName: eyeName, testType: testType),
+              style: const TextStyle(height: 1.45),
             ),
+
+            if (result != null) ...[
+              const SizedBox(height: 14),
+
+              const Text(
+                'About glasses or contacts',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+
+              const SizedBox(height: 5),
+
+              Text(
+                correctionGuidance(result),
+                style: const TextStyle(height: 1.45),
+              ),
+            ],
           ],
         ),
       );
@@ -717,52 +625,51 @@ class ReportBody extends StatelessWidget {
     // ================================================================
 
     final distanceInfo =
-        data.distanceRight ??
-            data.distanceLeft ??
-            data.distanceBoth;
+        data.distanceRight ?? data.distanceLeft ?? data.distanceBoth;
 
-    final nearInfo =
-        data.nearRight ??
-            data.nearLeft ??
-            data.nearBoth;
+    final nearInfo = data.nearRight ?? data.nearLeft ?? data.nearBoth;
 
     // ================================================================
     // REPORT
     // ================================================================
 
     return ListView(
-      padding:
-          const EdgeInsets.only(
-        bottom: 32,
-      ),
+      padding: const EdgeInsets.only(bottom: 32),
       children: [
         section(
           'VISION SCREENING REPORT',
           Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Overall Screening Summary',
-                style:
-                    TextStyle(
-                  fontSize: 18,
-                  fontWeight:
-                      FontWeight.w800,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               ),
 
-              const SizedBox(
-                height: 8,
-              ),
+              const SizedBox(height: 8),
 
               Text(
                 overallImpression(),
-                style:
-                    const TextStyle(
-                  fontSize: 15,
-                  height: 1.45,
-                ),
+                style: const TextStyle(fontSize: 15, height: 1.45),
+              ),
+
+              const SizedBox(height: 14),
+
+              const Text(
+                'How your result is determined',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+
+              const SizedBox(height: 6),
+
+              const Text(
+                'The screening starts with larger letters and moves to '
+                'progressively smaller letters. Your recorded screening level '
+                'represents the smallest line you were able to read before the '
+                'next smaller line became difficult. The standard 20/20 level '
+                'is used as a reference; it is not the smallest possible line '
+                'that a person can read.',
+                style: TextStyle(height: 1.45),
               ),
             ],
           ),
@@ -771,54 +678,38 @@ class ReportBody extends StatelessWidget {
         // ============================================================
         // DISTANCE TEST INFORMATION
         // ============================================================
-
         if (hasDistance)
           section(
             'TEST INFORMATION — DISTANCE VISION',
             Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                infoRow(
-                  'Test method:',
-                  data.distanceTestMethodLabel,
-                ),
+                infoRow('Test method:', data.distanceTestMethodLabel),
 
-                infoRow(
-                  'Response method:',
-                  data.distanceResponseMethodLabel,
-                ),
+                infoRow('Response method:', data.distanceResponseMethodLabel),
 
-                infoRow(
-                  'Test type:',
-                  'Distance visual acuity screening',
-                ),
+                infoRow('Test type:', 'Distance visual acuity screening'),
 
                 infoRow(
                   'Test distance:',
-                  distanceInfo
-                          ?.testDistanceLabel ??
+                  distanceInfo?.testDistanceLabel ??
                       'Approximately 10 ft / 3 m',
                 ),
 
                 infoRow(
                   'Correction:',
-                  distanceInfo
-                          ?.correction.label ??
-                      'Not recorded',
+                  distanceInfo?.correction.label ?? 'Not recorded',
                 ),
 
-                infoRow(
-                  'Normal reference:',
-                  '20/20',
-                ),
+                infoRow('Standard reference:', '20/20'),
 
-                infoRow(
-                  'Screening method:',
-                  data.distanceTestMethod ==
-                          VisionTestMethod.accessible
-                      ? 'Five-letter high-contrast large-letter browser screening'
-                      : 'Five-letter browser visual-acuity screening',
+                const SizedBox(height: 8),
+
+                const Text(
+                  'The test progresses from larger to smaller letters. '
+                  'The result shown for each eye is the smallest line '
+                  'successfully read during this screening.',
+                  style: TextStyle(color: Colors.black54, height: 1.4),
                 ),
               ],
             ),
@@ -827,69 +718,67 @@ class ReportBody extends StatelessWidget {
         // ============================================================
         // DISTANCE RESULTS
         // ============================================================
-
         if (hasDistance)
           section(
             'DISTANCE VISUAL ACUITY',
             Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 acuityCard(
-                  title:
-                      'Right Eye (OD)',
-                  result:
-                      data.distanceRight,
-                  testType:
-                      'distance',
+                  title: 'Right Eye (OD)',
+                  result: data.distanceRight,
+                  testType: 'distance',
                 ),
 
                 acuityCard(
-                  title:
-                      'Left Eye (OS)',
-                  result:
-                      data.distanceLeft,
-                  testType:
-                      'distance',
+                  title: 'Left Eye (OS)',
+                  result: data.distanceLeft,
+                  testType: 'distance',
                 ),
 
                 acuityCard(
-                  title:
-                      'Both Eyes (OU)',
-                  result:
-                      data.distanceBoth,
-                  testType:
-                      'distance',
+                  title: 'Both Eyes (OU)',
+                  result: data.distanceBoth,
+                  testType: 'distance',
                 ),
 
-                const SizedBox(
-                  height: 4,
-                ),
+                const SizedBox(height: 4),
 
                 const Text(
                   'Eye-to-Eye Comparison',
-                  style:
-                      TextStyle(
-                    fontSize: 16,
-                    fontWeight:
-                        FontWeight.w800,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                 ),
 
-                const SizedBox(
-                  height: 8,
-                ),
+                const SizedBox(height: 8),
 
                 Text(
                   compareEyes(
                     data.distanceRight,
                     data.distanceLeft,
-                    testType:
-                        'distance',
+                    testType: 'distance',
                   ),
-                  style:
-                      const TextStyle(
+                  style: const TextStyle(height: 1.45),
+                ),
+
+                const SizedBox(height: 18),
+
+                const Text(
+                  'Distance Vision Conclusion',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  testConclusion(
+                    data.distanceRight,
+                    data.distanceLeft,
+                    data.distanceBoth,
+                    testType: 'distance',
+                  ),
+                  style: const TextStyle(
                     height: 1.45,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -899,46 +788,37 @@ class ReportBody extends StatelessWidget {
         // ============================================================
         // NEAR TEST INFORMATION
         // ============================================================
-
         if (hasNear)
           section(
             'TEST INFORMATION — NEAR VISION',
             Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                infoRow(
-                  'Test method:',
-                  data.nearTestMethodLabel,
-                ),
+                infoRow('Test method:', data.nearTestMethodLabel),
 
-                infoRow(
-                  'Response method:',
-                  data.nearResponseMethodLabel,
-                ),
+                infoRow('Response method:', data.nearResponseMethodLabel),
 
-                infoRow(
-                  'Test type:',
-                  'Near / reading visual acuity screening',
-                ),
+                infoRow('Test type:', 'Near / reading visual acuity screening'),
 
                 infoRow(
                   'Test distance:',
-                  nearInfo
-                          ?.testDistanceLabel ??
-                      'Approximately 40 cm / 16 in',
+                  nearInfo?.testDistanceLabel ?? 'Approximately 40 cm / 16 in',
                 ),
 
                 infoRow(
                   'Correction:',
-                  nearInfo
-                          ?.correction.label ??
-                      'Not recorded',
+                  nearInfo?.correction.label ?? 'Not recorded',
                 ),
 
-                infoRow(
-                  'Normal reference:',
-                  '20/20',
+                infoRow('Standard reference:', '20/20'),
+
+                const SizedBox(height: 8),
+
+                const Text(
+                  'The test progresses from larger to smaller letters. '
+                  'The result shown for each eye is the smallest line '
+                  'successfully read during this screening.',
+                  style: TextStyle(color: Colors.black54, height: 1.4),
                 ),
               ],
             ),
@@ -947,69 +827,63 @@ class ReportBody extends StatelessWidget {
         // ============================================================
         // NEAR RESULTS
         // ============================================================
-
         if (hasNear)
           section(
             'NEAR / READING VISUAL ACUITY',
             Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 acuityCard(
-                  title:
-                      'Right Eye (OD)',
-                  result:
-                      data.nearRight,
-                  testType:
-                      'near',
+                  title: 'Right Eye (OD)',
+                  result: data.nearRight,
+                  testType: 'near',
                 ),
 
                 acuityCard(
-                  title:
-                      'Left Eye (OS)',
-                  result:
-                      data.nearLeft,
-                  testType:
-                      'near',
+                  title: 'Left Eye (OS)',
+                  result: data.nearLeft,
+                  testType: 'near',
                 ),
 
                 acuityCard(
-                  title:
-                      'Both Eyes (OU)',
-                  result:
-                      data.nearBoth,
-                  testType:
-                      'near',
+                  title: 'Both Eyes (OU)',
+                  result: data.nearBoth,
+                  testType: 'near',
                 ),
 
-                const SizedBox(
-                  height: 4,
-                ),
+                const SizedBox(height: 4),
 
                 const Text(
                   'Eye-to-Eye Comparison',
-                  style:
-                      TextStyle(
-                    fontSize: 16,
-                    fontWeight:
-                        FontWeight.w800,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                 ),
 
-                const SizedBox(
-                  height: 8,
-                ),
+                const SizedBox(height: 8),
 
                 Text(
-                  compareEyes(
+                  compareEyes(data.nearRight, data.nearLeft, testType: 'near'),
+                  style: const TextStyle(height: 1.45),
+                ),
+
+                const SizedBox(height: 18),
+
+                const Text(
+                  'Near Vision Conclusion',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  testConclusion(
                     data.nearRight,
                     data.nearLeft,
-                    testType:
-                        'near',
+                    data.nearBoth,
+                    testType: 'near',
                   ),
-                  style:
-                      const TextStyle(
+                  style: const TextStyle(
                     height: 1.45,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -1019,69 +893,49 @@ class ReportBody extends StatelessWidget {
         // ============================================================
         // COLOR VISION
         // ============================================================
-
         if (hasColorVision)
           section(
             'COLOR VISION SCREENING',
             Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 infoRow(
                   'Correct plates:',
                   '${cbText('correct')} of ${cbText('total')}',
                 ),
 
-                infoRow(
-                  'Plate-match score:',
-                  '$cbPct%',
-                ),
+                infoRow('Plate-match score:', '$cbPct%'),
 
-                const SizedBox(
-                  height: 8,
-                ),
+                const SizedBox(height: 8),
 
                 Text(
                   colorVisionSummary(),
-                  style:
-                      const TextStyle(
-                    height: 1.45,
-                  ),
+                  style: const TextStyle(height: 1.45),
                 ),
 
-                const SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
 
                 const Text(
                   'Color vision screening can be affected by display color '
                   'settings, brightness, blue-light filters, True Tone, '
                   'Night Mode, room lighting and viewing conditions.',
-                  style:
-                      TextStyle(
-                    color:
-                        Colors.black54,
-                    height: 1.4,
-                  ),
+                  style: TextStyle(color: Colors.black54, height: 1.4),
                 ),
               ],
             ),
           ),
 
         // ============================================================
-        // OVERALL
+        // OVERALL CONCLUSION
         // ============================================================
-
         section(
-          'OVERALL SCREENING IMPRESSION',
+          'OVERALL SCREENING CONCLUSION',
           Text(
             overallImpression(),
-            style:
-                const TextStyle(
+            style: const TextStyle(
               fontSize: 15,
-              height: 1.45,
-              fontWeight:
-                  FontWeight.w600,
+              height: 1.5,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -1089,60 +943,58 @@ class ReportBody extends StatelessWidget {
         // ============================================================
         // RECOMMENDATION
         // ============================================================
-
         section(
-          'RECOMMENDATION',
+          'WHAT SHOULD I DO NEXT?',
           const Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '• Results should be interpreted together with how you see '
-                'in daily life.',
-                style:
-                    TextStyle(
-                  height: 1.4,
-                ),
+                '• If your result is below the standard 20/20 reference, '
+                'repeat the screening under the recommended conditions.',
+                style: TextStyle(height: 1.4),
               ),
 
-              SizedBox(
-                height: 8,
+              SizedBox(height: 8),
+
+              Text(
+                '• If you receive a similar result again, consider a '
+                'professional eye examination.',
+                style: TextStyle(height: 1.4),
               ),
+
+              SizedBox(height: 8),
+
+              Text(
+                '• If you do not currently wear glasses or contacts, an eye '
+                'exam can determine whether vision correction may help.',
+                style: TextStyle(height: 1.4),
+              ),
+
+              SizedBox(height: 8),
+
+              Text(
+                '• If you already wear glasses or contacts and your vision '
+                'remains below the reference level, an eye-care professional '
+                'can check whether your prescription needs to be updated.',
+                style: TextStyle(height: 1.4),
+              ),
+
+              SizedBox(height: 8),
 
               Text(
                 '• If one eye performs noticeably weaker than the other, '
-                'repeat the screening under the recommended conditions.',
-                style:
-                    TextStyle(
-                  height: 1.4,
-                ),
+                'repeat the screening. If the difference remains, consider '
+                'a professional eye examination.',
+                style: TextStyle(height: 1.4),
               ),
 
-              SizedBox(
-                height: 8,
-              ),
-
-              Text(
-                '• If reduced vision or an eye-to-eye difference remains, '
-                'consider a comprehensive eye examination.',
-                style:
-                    TextStyle(
-                  height: 1.4,
-                ),
-              ),
-
-              SizedBox(
-                height: 8,
-              ),
+              SizedBox(height: 8),
 
               Text(
                 '• Sudden vision loss, severe eye pain, new flashes or '
                 'floaters, or an eye injury should be evaluated promptly '
                 'by an eye-care professional.',
-                style:
-                    TextStyle(
-                  height: 1.4,
-                ),
+                style: TextStyle(height: 1.4),
               ),
             ],
           ),
@@ -1151,7 +1003,6 @@ class ReportBody extends StatelessWidget {
         // ============================================================
         // LIMITATIONS
         // ============================================================
-
         section(
           'WHAT THIS SCREENING DOES NOT MEASURE',
           const Text(
@@ -1160,16 +1011,11 @@ class ReportBody extends StatelessWidget {
             'retina, macula, lens, optic nerve health, pupil reactions or '
             'other findings assessed during a comprehensive professional '
             'eye examination.',
-            style:
-                TextStyle(
-              height: 1.45,
-            ),
+            style: TextStyle(height: 1.45),
           ),
         ),
 
-        const SizedBox(
-          height: 4,
-        ),
+        const SizedBox(height: 4),
 
         const Text(
           'Important: PeekVision provides preliminary browser-based vision '
@@ -1181,14 +1027,9 @@ class ReportBody extends StatelessWidget {
           '20/5 and 20/4 represent the smallest screening level reached and '
           'should not be considered clinically confirmed measurements '
           'without proper display calibration.',
-          style:
-              TextStyle(
-            color:
-                Color(
-              0xFFA85500,
-            ),
-            fontWeight:
-                FontWeight.w700,
+          style: TextStyle(
+            color: Color(0xFFA85500),
+            fontWeight: FontWeight.w700,
             height: 1.45,
           ),
         ),
