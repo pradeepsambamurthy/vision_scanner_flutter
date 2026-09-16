@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Snellen to logMAR Conversion Chart | Visual Acuity Calculator | PeekVision
+  </title>
+
+  <meta
+    name="description"
+    content="Convert Snellen visual acuity to logMAR and decimal notation. See a visual acuity conversion chart for 20/400 through 20/4 and use the free Snellen to logMAR calculator."
+  />
+
+  <meta
+    name="keywords"
+    content="Snellen to logMAR, logMAR to Snellen, visual acuity conversion chart, 20/20 logMAR, 20/40 logMAR, Snellen conversion calculator, visual acuity calculator"
+  />
+
+  <meta name="robots" content="index, follow" />
+
+  <link
+    rel="canonical"
+    href="https://www.peekvision.io/snellen-logmar-conversion.html"
+  />
+
+  <meta
+    property="og:title"
+    content="Snellen to logMAR Visual Acuity Conversion Chart"
+  />
+
+  <meta
+    property="og:description"
+    content="Convert Snellen visual acuity to logMAR and decimal notation using PeekVision's free conversion chart and calculator."
+  />
+
+  <meta
+    property="og:url"
+    content="https://www.peekvision.io/snellen-logmar-conversion.html"
+  />
+
+  <meta property="og:type" content="website" />
+
+  <meta property="og:site_name" content="PeekVision" />
+
+  <meta
+    name="twitter:card"
+    content="summary"
+  />
+
+  <meta
+    name="twitter:title"
+    content="Snellen to logMAR Visual Acuity Conversion Chart"
+  />
+
+  <meta
+    name="twitter:description"
+    content="Free Snellen, logMAR and decimal visual acuity conversion chart and calculator."
+  />
+
+  <style>
+    :root {
+      --blue: #174bae;
+      --blue-dark: #0b2b66;
+      --blue-light: #edf4ff;
+      --text: #172033;
+      --muted: #5f6b7a;
+      --border: #dfe5ec;
+      --white: #ffffff;
+      --background: #f5f8fc;
+      --success-bg: #edf9f2;
+      --success-border: #b9e6c9;
+      --warning-bg: #fff7e8;
+      --warning-border: #f1d39a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+      color: var(--text);
+      background: var(--background);
+      line-height: 1.65;
+    }
+
+    a {
+      color: var(--blue);
+    }
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    .topbar {
+      background:
+        linear-gradient(
+          135deg,
+          #0c2459,
+          #174bae
+        );
+      color: white;
+      padding: 18px 20px;
+    }
+
+    .topbar-inner {
+      max-width: 1050px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .brand a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .topnav {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 14px;
+    }
+
+    .topnav a {
+      color: white;
+      text-decoration: none;
+      opacity: 0.95;
+    }
+
+    .topnav a:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 42px 20px 60px;
+    }
+
+    .hero {
+      background: white;
+      border-radius: 20px;
+      padding: 36px;
+      box-shadow:
+        0 12px 35px
+        rgba(20, 55, 100, 0.08);
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: clamp(
+        32px,
+        5vw,
+        48px
+      );
+      line-height: 1.12;
+      margin: 0 0 16px;
+      letter-spacing: -1.2px;
+    }
+
+    h2 {
+      margin-top: 0;
+      line-height: 1.25;
+      font-size: 27px;
+    }
+
+    h3 {
+      font-size: 20px;
+      margin-top: 26px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin-top: 0;
+    }
+
+    .lead {
+      font-size: 19px;
+      color: var(--muted);
+      max-width: 800px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow:
+        0 8px 25px
+        rgba(20, 55, 100, 0.06);
+    }
+
+    .formula {
+      background: var(--blue-light);
+      border: 1px solid #c9dbff;
+      border-radius: 12px;
+      padding: 18px;
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Monaco,
+        Consolas,
+        monospace;
+      overflow-x: auto;
+      margin: 18px 0;
+    }
+
+    .example {
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .notice {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 20px;
+    }
+
+    .calculator-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border:
+        1px solid
+        #cbd4df;
+      border-radius: 10px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow:
+        0 0 0 3px
+        rgba(23, 75, 174, 0.12);
+    }
+
+    button {
+      border: 0;
+      background: var(--blue);
+      color: white;
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: var(--blue-dark);
+    }
+
+    .button-row {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .secondary-button {
+      background: #e9edf3;
+      color: var(--text);
+    }
+
+    .secondary-button:hover {
+      background: #dce2ea;
+    }
+
+    .results {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 12px;
+      background: var(--blue-light);
+      border: 1px solid #c9dbff;
+    }
+
+    .results strong {
+      color: var(--blue-dark);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 580px;
+      background: white;
+    }
+
+    th,
+    td {
+      padding: 13px 16px;
+      text-align: left;
+      border-bottom:
+        1px solid
+        var(--border);
+    }
+
+    th {
+      background: #eff4fb;
+      font-weight: 800;
+    }
+
+    tbody tr:hover {
+      background: #f8fbff;
+    }
+
+    .reference-row {
+      background: #eef8ff;
+      font-weight: 800;
+    }
+
+    ul,
+    ol {
+      padding-left: 24px;
+    }
+
+    .related-links {
+      display: grid;
+      grid-template-columns:
+        repeat(
+          2,
+          minmax(0, 1fr)
+        );
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .related-links a {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-decoration: none;
+      font-weight: 700;
+      background: #fafcff;
+    }
+
+    .related-links a:hover {
+      background: var(--blue-light);
+    }
+
+    footer {
+      background: #0c2459;
+      color: white;
+      padding: 26px 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    footer a {
+      color: white;
+    }
+
+    @media (max-width: 700px) {
+      .hero,
+      .card {
+        padding: 22px;
+      }
+
+      .calculator-grid,
+      .related-links {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 34px;
+      }
+
+      h2 {
+        font-size: 24px;
+      }
+
+      .topbar-inner {
+        align-items: flex-start;
+      }
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Snellen to logMAR Visual Acuity Conversion Chart",
+    "url": "https://www.peekvision.io/snellen-logmar-conversion.html",
+    "description": "A free Snellen to logMAR and decimal visual acuity conversion chart and calculator from PeekVision.",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "PeekVision",
+      "url": "https://www.peekvision.io/"
+    },
+    "about": [
+      "Visual acuity",
+      "Snellen visual acuity",
+      "logMAR",
+      "Eye screening"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is 20/20 vision in logMAR?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "20/20 visual acuity corresponds to approximately 0.00 logMAR."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is 20/40 vision in logMAR?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "20/40 visual acuity corresponds to approximately 0.30 logMAR."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do you convert Snellen acuity to logMAR?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "logMAR is calculated as log10 of the Snellen denominator divided by the Snellen numerator. For 20-foot Snellen notation, logMAR = log10(denominator / 20)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is a lower logMAR score better?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Generally, lower logMAR values represent better visual acuity. A logMAR value of 0.00 corresponds to approximately 20/20, while negative values represent acuity better than the 20/20 reference."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <a href="https://www.peekvision.io/">
+          PeekVision
+        </a>
+      </div>
+
+      <nav
+        class="topnav"
+        aria-label="Main navigation"
+      >
+        <a href="https://www.peekvision.io/">
+          Home
+        </a>
+
+        <a href="/visual-acuity-test.html">
+          Visual Acuity
+        </a>
+
+        <a href="/accessible-vision-test.html">
+          Accessible Test
+        </a>
+
+        <a href="/color-vision-test.html">
+          Color Vision
+        </a>
+
+        <a href="/methodology.html">
+          Methodology
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="hero">
+      <div class="eyebrow">
+        Visual Acuity Reference
+      </div>
+
+      <h1>
+        Snellen to logMAR Visual Acuity Conversion Chart
+      </h1>
+
+      <p class="lead">
+        Compare Snellen visual acuity, logMAR and decimal acuity
+        notation using the chart and calculator below.
+        The normal reference of 20/20 corresponds to approximately
+        0.00 logMAR and decimal acuity 1.00.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>
+        Snellen to logMAR Calculator
+      </h2>
+
+      <p>
+        Enter a Snellen numerator and denominator.
+        In the United States, the numerator is usually
+        <strong>20</strong>.
+      </p>
+
+      <div class="calculator-grid">
+
+        <div>
+          <label for="snellenNumerator">
+            Snellen numerator
+          </label>
+
+          <input
+            id="snellenNumerator"
+            type="number"
+            min="1"
+            step="1"
+            value="20"
+            inputmode="numeric"
+          />
+        </div>
+
+        <div>
+          <label for="snellenDenominator">
+            Snellen denominator
+          </label>
+
+          <input
+            id="snellenDenominator"
+            type="number"
+            min="1"
+            step="1"
+            value="40"
+            inputmode="numeric"
+          />
+        </div>
+
+      </div>
+
+      <div class="button-row">
+        <button
+          type="button"
+          onclick="calculateAcuity()"
+        >
+          Convert
+        </button>
+
+        <button
+          type="button"
+          class="secondary-button"
+          onclick="resetCalculator()"
+        >
+          Reset
+        </button>
+      </div>
+
+      <div
+        id="calculatorResult"
+        class="results"
+        aria-live="polite"
+      >
+        <strong>20/40</strong>
+        is approximately
+        <strong>0.30 logMAR</strong>
+        and
+        <strong>0.50 decimal acuity</strong>.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>
+        Visual Acuity Conversion Chart
+      </h2>
+
+      <p>
+        The following table shows commonly used approximate
+        equivalents between Snellen, logMAR and decimal acuity.
+      </p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">
+                Snellen
+              </th>
+              <th scope="col">
+                logMAR
+              </th>
+              <th scope="col">
+                Decimal acuity
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr>
+              <td>20/400</td>
+              <td>1.30</td>
+              <td>0.05</td>
+            </tr>
+
+            <tr>
+              <td>20/320</td>
+              <td>1.20</td>
+              <td>0.06</td>
+            </tr>
+
+            <tr>
+              <td>20/250</td>
+              <td>1.10</td>
+              <td>0.08</td>
+            </tr>
+
+            <tr>
+              <td>20/200</td>
+              <td>1.00</td>
+              <td>0.10</td>
+            </tr>
+
+            <tr>
+              <td>20/160</td>
+              <td>0.90</td>
+              <td>0.13</td>
+            </tr>
+
+            <tr>
+              <td>20/125</td>
+              <td>0.80</td>
+              <td>0.16</td>
+            </tr>
+
+            <tr>
+              <td>20/100</td>
+              <td>0.70</td>
+              <td>0.20</td>
+            </tr>
+
+            <tr>
+              <td>20/80</td>
+              <td>0.60</td>
+              <td>0.25</td>
+            </tr>
+
+            <tr>
+              <td>20/63</td>
+              <td>0.50</td>
+              <td>0.32</td>
+            </tr>
+
+            <tr>
+              <td>20/50</td>
+              <td>0.40</td>
+              <td>0.40</td>
+            </tr>
+
+            <tr>
+              <td>20/40</td>
+              <td>0.30</td>
+              <td>0.50</td>
+            </tr>
+
+            <tr>
+              <td>20/32</td>
+              <td>0.20</td>
+              <td>0.63</td>
+            </tr>
+
+            <tr>
+              <td>20/25</td>
+              <td>0.10</td>
+              <td>0.80</td>
+            </tr>
+
+            <tr class="reference-row">
+              <td>20/20</td>
+              <td>0.00</td>
+              <td>1.00</td>
+            </tr>
+
+            <tr>
+              <td>20/16</td>
+              <td>-0.10</td>
+              <td>1.25</td>
+            </tr>
+
+            <tr>
+              <td>20/13</td>
+              <td>-0.20</td>
+              <td>1.54</td>
+            </tr>
+
+            <tr>
+              <td>20/10</td>
+              <td>-0.30</td>
+              <td>2.00</td>
+            </tr>
+
+            <tr>
+              <td>20/8</td>
+              <td>-0.40</td>
+              <td>2.50</td>
+            </tr>
+
+            <tr>
+              <td>20/6</td>
+              <td>about -0.52</td>
+              <td>3.33</td>
+            </tr>
+
+            <tr>
+              <td>20/5</td>
+              <td>about -0.60</td>
+              <td>4.00</td>
+            </tr>
+
+            <tr>
+              <td>20/4</td>
+              <td>about -0.70</td>
+              <td>5.00</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <div class="notice">
+        <strong>Note:</strong>
+        Some clinical charts use standardized logMAR steps and
+        rounded Snellen equivalents. Therefore, a displayed Snellen
+        value and its exact mathematical conversion may differ
+        slightly because of rounding.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>
+        How to Convert Snellen to logMAR
+      </h2>
+
+      <p>
+        The general mathematical relationship is:
+      </p>
+
+      <div class="formula">
+        logMAR = log10(Snellen denominator ÷ Snellen numerator)
+      </div>
+
+      <p>
+        For standard U.S. 20-foot Snellen notation:
+      </p>
+
+      <div class="formula">
+        logMAR = log10(denominator ÷ 20)
+      </div>
+
+      <div class="example">
+        <strong>Example: 20/40</strong>
+
+        <br /><br />
+
+        logMAR = log10(40 ÷ 20)
+
+        <br />
+
+        logMAR = log10(2)
+
+        <br />
+
+        logMAR ≈ 0.30
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>
+        How to Convert logMAR to Snellen
+      </h2>
+
+      <p>
+        For a 20-foot Snellen numerator, the approximate denominator
+        can be calculated from logMAR using:
+      </p>
+
+      <div class="formula">
+        Snellen denominator = 20 × 10<sup>logMAR</sup>
+      </div>
+
+      <div class="example">
+        <strong>Example: logMAR 0.30</strong>
+
+        <br /><br />
+
+        denominator = 20 × 10<sup>0.30</sup>
+
+        <br />
+
+        denominator ≈ 40
+
+        <br /><br />
+
+        Therefore:
+
+        <strong>0.30 logMAR ≈ 20/40</strong>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>
+        What Does logMAR Mean?
+      </h2>
+
+      <p>
+        logMAR means
+        <strong>
+          logarithm of the Minimum Angle of Resolution
+        </strong>.
+      </p>
+
+      <p>
+        Unlike Snellen notation, logMAR uses a logarithmic scale.
+        This makes it useful for comparing changes in visual acuity
+        across standardized chart levels.
+      </p>
+
+      <ul>
+        <li>
+          <strong>0.00 logMAR</strong>
+          corresponds approximately to 20/20.
+        </li>
+
+        <li>
+          <strong>Positive logMAR values</strong>
+          generally represent reduced visual acuity compared with
+          the 20/20 reference.
+        </li>
+
+        <li>
+          <strong>Negative logMAR values</strong>
+          represent acuity better than the 20/20 reference.
+        </li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>
+        Snellen vs logMAR vs Decimal Acuity
+      </h2>
+
+      <h3>
+        Snellen
+      </h3>
+
+      <p>
+        Snellen notation is widely recognized in the United States
+        and is commonly written as values such as 20/20, 20/40 or
+        20/100.
+      </p>
+
+      <h3>
+        logMAR
+      </h3>
+
+      <p>
+        logMAR expresses visual acuity on a logarithmic scale.
+        Standardized research and clinical charts often use logMAR
+        because each step can represent a more consistent change in
+        visual acuity.
+      </p>
+
+      <h3>
+        Decimal acuity
+      </h3>
+
+      <p>
+        Decimal acuity is another way to express visual acuity.
+        It can be calculated approximately by dividing the Snellen
+        numerator by the denominator.
+      </p>
+
+      <div class="formula">
+        Decimal acuity = Snellen numerator ÷ Snellen denominator
+      </div>
+
+      <p>
+        For example:
+      </p>
+
+      <div class="example">
+        20/40 = 20 ÷ 40 = 0.50 decimal acuity
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>
+        Common Visual Acuity Examples
+      </h2>
+
+      <h3>
+        What is 20/20 in logMAR?
+      </h3>
+
+      <p>
+        20/20 corresponds to approximately
+        <strong>0.00 logMAR</strong>.
+      </p>
+
+      <h3>
+        What is 20/40 in logMAR?
+      </h3>
+
+      <p>
+        20/40 corresponds to approximately
+        <strong>0.30 logMAR</strong>.
+      </p>
+
+      <h3>
+        What is 20/50 in logMAR?
+      </h3>
+
+      <p>
+        20/50 corresponds to approximately
+        <strong>0.40 logMAR</strong>.
+      </p>
+
+      <h3>
+        What is 20/100 in logMAR?
+      </h3>
+
+      <p>
+        20/100 corresponds to approximately
+        <strong>0.70 logMAR</strong>.
+      </p>
+
+      <h3>
+        Is a lower logMAR value better?
+      </h3>
+
+      <p>
+        Generally, yes.
+        Lower logMAR values indicate better visual acuity.
+        The 20/20 reference is approximately 0.00 logMAR,
+        while values below zero correspond to acuity better than
+        that reference.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>
+        About Online Visual Acuity Measurements
+      </h2>
+
+      <p>
+        Visual acuity measured through a web browser can be affected
+        by physical screen size, display scaling, browser zoom,
+        viewing distance, lighting and device settings.
+      </p>
+
+      <p>
+        For this reason, values calculated or displayed by an online
+        screening tool should not automatically be interpreted as a
+        clinically calibrated measurement.
+      </p>
+
+      <div class="notice">
+        <strong>Important:</strong>
+        PeekVision provides preliminary browser-based vision
+        screening and educational information only.
+        It does not diagnose eye disease, determine an eyeglass
+        prescription or replace a comprehensive professional eye
+        examination.
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>
+        Related PeekVision Resources
+      </h2>
+
+      <p>
+        Learn more about visual acuity and online vision screening:
+      </p>
+
+      <div class="related-links">
+
+        <a href="/visual-acuity-test.html">
+          Visual Acuity Test Guide
+        </a>
+
+        <a href="/20-20-vision.html">
+          What Does 20/20 Vision Mean?
+        </a>
+
+        <a href="/online-eye-test.html">
+          Free Online Eye Test
+        </a>
+
+        <a href="/accessible-vision-test.html">
+          Accessible Vision Test
+        </a>
+
+        <a href="/color-vision-test.html">
+          Color Vision Test
+        </a>
+
+        <a href="/methodology.html">
+          PeekVision Methodology
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>
+      © PeekVision · Preliminary browser-based vision screening
+    </p>
+
+    <p>
+      <a href="https://www.peekvision.io/">
+        Home
+      </a>
+      ·
+      <a href="/privacy.html">
+        Privacy
+      </a>
+      ·
+      <a href="/terms.html">
+        Terms
+      </a>
+      ·
+      <a href="/methodology.html">
+        Methodology
+      </a>
+    </p>
+  </footer>
+
+  <script>
+    function calculateAcuity() {
+      const numeratorInput =
+        document.getElementById(
+          'snellenNumerator'
+        );
+
+      const denominatorInput =
+        document.getElementById(
+          'snellenDenominator'
+        );
+
+      const result =
+        document.getElementById(
+          'calculatorResult'
+        );
+
+      const numerator =
+        Number(
+          numeratorInput.value
+        );
+
+      const denominator =
+        Number(
+          denominatorInput.value
+        );
+
+      if (
+        !Number.isFinite(numerator) ||
+        !Number.isFinite(denominator) ||
+        numerator <= 0 ||
+        denominator <= 0
+      ) {
+        result.innerHTML =
+          'Please enter valid positive Snellen values.';
+
+        return;
+      }
+
+      const logMAR =
+        Math.log10(
+          denominator / numerator
+        );
+
+      const decimal =
+        numerator / denominator;
+
+      result.innerHTML =
+        '<strong>' +
+        numerator +
+        '/' +
+        denominator +
+        '</strong> is approximately ' +
+        '<strong>' +
+        logMAR.toFixed(2) +
+        ' logMAR</strong> and ' +
+        '<strong>' +
+        decimal.toFixed(2) +
+        ' decimal acuity</strong>.';
+    }
+
+    function resetCalculator() {
+      document.getElementById(
+        'snellenNumerator'
+      ).value = '20';
+
+      document.getElementById(
+        'snellenDenominator'
+      ).value = '40';
+
+      calculateAcuity();
+    }
+  </script>
+
+</body>
+</html>
