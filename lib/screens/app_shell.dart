@@ -169,6 +169,12 @@ class _AppShellState extends State<AppShell>
 
                 child: TabBar(
                   controller: _tab,
+                  isScrollable: MediaQuery.of(context).size.width < 700,
+
+                  tabAlignment: MediaQuery.of(context).size.width < 700
+                      ? TabAlignment.start
+                      : TabAlignment.fill,
+                  labelPadding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width < 700 ? 18 : 8,),    
 
                   onTap: (i) {
                     _tab.animateTo(i);
@@ -609,8 +615,9 @@ class _HomeContent extends StatelessWidget {
         ),
 
         child: ListView(
-          padding:
-              const EdgeInsets.all(24),
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width < 600 ? 16 : 24,vertical: 24,),
+
 
           children: [
             Text(
@@ -668,7 +675,9 @@ class _HomeContent extends StatelessWidget {
 
               children: [
                 SizedBox(
-                  width: 260,
+                   width: MediaQuery.of(context).size.width < 600
+                        ? double.infinity
+                        : 260,
 
                   child:
                       FilledButton.icon(
@@ -687,7 +696,9 @@ class _HomeContent extends StatelessWidget {
                 ),
 
                 SizedBox(
-                  width: 260,
+                  width: MediaQuery.of(context).size.width < 600
+                      ? double.infinity
+                      : 260,
 
                   child:
                       FilledButton.icon(
@@ -887,12 +898,12 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints:
-          const BoxConstraints(
-        minWidth: 260,
-        maxWidth: 360,
-      ),
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
+    return SizedBox(
+      width: isMobile
+          ? MediaQuery.of(context).size.width - 32
+          : 320,
 
       child: Glass(
         padding:
