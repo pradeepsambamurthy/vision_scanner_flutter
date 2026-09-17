@@ -5,8 +5,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/vision_models.dart' as vm;
+import '../services/display_calibration_service.dart';
 import '../services/report_service.dart';
 import '../services/voice_service.dart';
+import '../utils/vision_test_profile.dart';
+import '../widgets/display_calibration_dialog.dart';
 
 enum _AccessibleStage { instructions, right, left, both, finished }
 
@@ -74,6 +77,9 @@ class _AccessibleVisionTestScreenState
   bool _bothBelowRange = false;
 
   vm.VisionCorrection _correction = vm.VisionCorrection.none;
+
+  // Stores the distance/device profile selected after screen calibration.
+  VisionTestProfile? _testProfile;
 
   // ================================================================
   // INIT / DISPOSE
@@ -212,27 +218,35 @@ class _AccessibleVisionTestScreenState
       return;
     }
 
+    final profile = _testProfile;
+
+    if (profile == null) {
+      return;
+    }
+
+    final distance = profile.spokenDistance;
+
     String instruction;
 
     switch (_stage) {
       case _AccessibleStage.right:
         instruction =
             'Cover your left eye and use only your right eye. '
-            'Stay approximately ten feet from the screen. '
+            'Stay $distance from the screen. '
             'Read the five letters from left to right.';
         break;
 
       case _AccessibleStage.left:
         instruction =
             'Cover your right eye and use only your left eye. '
-            'Stay approximately ten feet from the screen. '
+            'Stay $distance from the screen. '
             'Read the five letters from left to right.';
         break;
 
       case _AccessibleStage.both:
         instruction =
             'Keep both eyes open. '
-            'Stay approximately ten feet from the screen. '
+            'Stay $distance from the screen. '
             'Read the five letters from left to right.';
         break;
 
@@ -370,33 +384,24 @@ class _AccessibleVisionTestScreenState
       'C': 'C',
       'SEE': 'C',
       'SEA': 'C',
-
       'D': 'D',
       'DEE': 'D',
-
       'H': 'H',
       'AITCH': 'H',
       'EIGHTCH': 'H',
-
       'K': 'K',
       'KAY': 'K',
       'KAYE': 'K',
-
       'N': 'N',
       'EN': 'N',
-
       'O': 'O',
       'OH': 'O',
-
       'R': 'R',
       'ARE': 'R',
-
       'S': 'S',
       'ESS': 'S',
-
       'V': 'V',
       'VEE': 'V',
-
       'Z': 'Z',
       'ZEE': 'Z',
       'ZED': 'Z',
@@ -452,9 +457,28 @@ class _AccessibleVisionTestScreenState
   // TEST FLOW
   // ================================================================
 
-  void _startRight() {
+  Future<void> _startRight() async {
+    if (!DisplayCalibrationService.instance.isCalibrated) {
+      final calibrated = await showDisplayCalibrationDialog(context);
+
+      if (!calibrated || !mounted) {
+        return;
+      }
+    }
+
+    final profile = VisionTestProfile.distance(
+      context: context,
+
+      // 20/400 is the largest level
+      // in the Accessible Vision Test.
+      largestLogMar: _steps.first,
+    );
+
     setState(() {
+      _testProfile = profile;
+
       _resetLevel();
+
       _stage = _AccessibleStage.right;
     });
 
@@ -508,6 +532,7 @@ class _AccessibleVisionTestScreenState
           _resetLevel();
 
           _stage = _AccessibleStage.left;
+
           speakNextEye = true;
           break;
 
@@ -518,6 +543,7 @@ class _AccessibleVisionTestScreenState
           _resetLevel();
 
           _stage = _AccessibleStage.both;
+
           speakNextEye = true;
           break;
 
@@ -526,6 +552,7 @@ class _AccessibleVisionTestScreenState
           _bothBelowRange = belowRange;
 
           _stage = _AccessibleStage.finished;
+
           saveResults = true;
           break;
 
@@ -557,6 +584,8 @@ class _AccessibleVisionTestScreenState
       return;
     }
 
+    final testDistance = _testProfile?.distanceCm ?? 300.0;
+
     ReportService.instance.updateAcuityModeAware(
       mode: vm.TestMode.distance,
       testMethod: VisionTestMethod.accessible,
@@ -566,21 +595,21 @@ class _AccessibleVisionTestScreenState
         eye: vm.EyeSide.right,
         belowRange: _rightBelowRange,
         correction: _correction,
-        testDistanceCm: 300,
+        testDistanceCm: testDistance,
       ),
       left: vm.AcuityResult(
         _leftResult!,
         eye: vm.EyeSide.left,
         belowRange: _leftBelowRange,
         correction: _correction,
-        testDistanceCm: 300,
+        testDistanceCm: testDistance,
       ),
       both: vm.AcuityResult(
         _bothResult!,
         eye: vm.EyeSide.both,
         belowRange: _bothBelowRange,
         correction: _correction,
-        testDistanceCm: 300,
+        testDistanceCm: testDistance,
       ),
     );
   }
@@ -603,6 +632,10 @@ class _AccessibleVisionTestScreenState
       _heardWords = '';
       _voiceMessage = '';
       _isListening = false;
+
+      // Keep screen calibration, but recalculate
+      // the profile when the test starts again.
+      _testProfile = null;
 
       _resetLevel();
 
@@ -686,14 +719,31 @@ class _AccessibleVisionTestScreenState
                 SizedBox(height: 18),
 
                 Text(
-                  '1. Stay approximately 10 ft / 3 m from the screen.',
+                  '1. PeekVision will first calibrate the physical size of '
+                  'this screen.',
                   style: TextStyle(fontSize: 18, height: 1.4),
                 ),
 
                 SizedBox(height: 12),
 
                 Text(
-                  '2. The test begins with very large letters and gradually '
+                  '2. After calibration, PeekVision will calculate an '
+                  'appropriate viewing distance for this screen.',
+                  style: TextStyle(fontSize: 18, height: 1.4),
+                ),
+
+                SizedBox(height: 12),
+
+                Text(
+                  '3. Follow the testing distance shown on the screen and '
+                  'keep that distance throughout the test.',
+                  style: TextStyle(fontSize: 18, height: 1.4),
+                ),
+
+                SizedBox(height: 12),
+
+                Text(
+                  '4. The test begins with very large letters and gradually '
                   'moves to smaller letters.',
                   style: TextStyle(fontSize: 18, height: 1.4),
                 ),
@@ -701,28 +751,16 @@ class _AccessibleVisionTestScreenState
                 SizedBox(height: 12),
 
                 Text(
-                  '3. Five high-contrast letters are shown on every line.',
+                  '5. Five high-contrast letters are shown on every line. '
+                  'Read them from left to right.',
                   style: TextStyle(fontSize: 18, height: 1.4),
                 ),
 
                 SizedBox(height: 12),
 
                 Text(
-                  '4. Read the five letters from left to right.',
-                  style: TextStyle(fontSize: 18, height: 1.4),
-                ),
-
-                SizedBox(height: 12),
-
-                Text(
-                  '5. You may speak the letters or use the large buttons.',
-                  style: TextStyle(fontSize: 18, height: 1.4),
-                ),
-
-                SizedBox(height: 12),
-
-                Text(
-                  '6. There is no time limit.',
+                  '6. You may speak the letters or use the large buttons. '
+                  'There is no time limit.',
                   style: TextStyle(fontSize: 18, height: 1.4),
                 ),
 
@@ -805,7 +843,7 @@ class _AccessibleVisionTestScreenState
             ),
             icon: const Icon(Icons.play_arrow, size: 28),
             label: const Text(
-              'Start Accessible Vision Test',
+              'Calibrate & Start Accessible Test',
               style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
             ),
           ),
@@ -814,7 +852,9 @@ class _AccessibleVisionTestScreenState
 
           const Text(
             'This is a preliminary browser-based vision screening. '
-            'It does not diagnose eye disease and does not replace a '
+            'Display calibration improves consistency across different '
+            'screens, but the result is still an approximation and does '
+            'not replace a professionally calibrated eye chart or a '
             'comprehensive eye examination.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.black54, fontSize: 14, height: 1.4),
@@ -831,36 +871,18 @@ class _AccessibleVisionTestScreenState
   Widget _buildTest() {
     final current = _steps[_index];
 
+    final profile = _testProfile;
+
+    if (profile == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth;
-        final availableHeight = constraints.maxHeight;
-
-        final isMobile = availableWidth < 600;
-
-        // Browser-based progressive display scale.
-        //
-        // 20/400 = largest letters
-        // 20/50  = smallest letters
-        //
-        // The sizes intentionally become smaller on every level.
-        // No FittedBox is used because that could normalize the
-        // apparent size of different acuity levels.
-
-        final maxFontSize = math
-            .min(
-              availableWidth * (isMobile ? 0.13 : 0.14),
-              availableHeight * 0.25,
-            )
-            .toDouble();
-
-        final minFontSize = math
-            .max(isMobile ? 24.0 : 38.0, maxFontSize * 0.42)
-            .toDouble();
-
-        final progress = _index / (_steps.length - 1);
-
-        final fontSize = maxFontSize - ((maxFontSize - minFontSize) * progress);
+        final fontSize = DisplayCalibrationService.instance.optotypeHeightPx(
+          logMar: current,
+          distanceCm: profile.distanceCm,
+        );
 
         return Container(
           width: double.infinity,
@@ -909,9 +931,20 @@ class _AccessibleVisionTestScreenState
 
               const SizedBox(height: 4),
 
-              const Text(
-                'Stay approximately 10 ft / 3 m from the screen.',
-                style: TextStyle(fontSize: 16, color: Colors.black87),
+              Text(
+                'Testing distance: ${profile.distanceLabel}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
+
+              const SizedBox(height: 3),
+
+              Text(
+                '${profile.deviceLabel} • Display calibrated',
+                style: const TextStyle(fontSize: 14, color: Colors.black54),
               ),
 
               const SizedBox(height: 12),
@@ -937,8 +970,9 @@ class _AccessibleVisionTestScreenState
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: fontSize,
+                        height: 1.0,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: isMobile ? 5 : 9,
+                        letterSpacing: fontSize * 0.10,
                         color: Colors.black,
                       ),
                     ),
@@ -1409,6 +1443,8 @@ class _AccessibleVisionTestScreenState
       );
     }
 
+    final profile = _testProfile;
+
     return Container(
       color: Colors.white,
       child: ListView(
@@ -1440,7 +1476,19 @@ class _AccessibleVisionTestScreenState
                   'Accessible / Large-Letter Distance Vision Test',
                 ),
 
-                infoRow('Test distance:', 'Approximately 10 ft / 3 m'),
+                infoRow(
+                  'Test distance:',
+                  profile?.distanceLabel ?? 'Not available',
+                ),
+
+                infoRow('Device:', profile?.deviceLabel ?? 'Unknown'),
+
+                infoRow(
+                  'Display calibration:',
+                  DisplayCalibrationService.instance.isCalibrated
+                      ? 'Completed'
+                      : 'Not completed',
+                ),
 
                 infoRow('Correction:', _correction.label),
 
@@ -1476,9 +1524,10 @@ class _AccessibleVisionTestScreenState
                 const SizedBox(height: 10),
 
                 const Text(
+                  'Letter size is calculated using the calibrated display '
+                  'scale and the testing distance selected for this screen. '
                   'If you reach 20/50, you have completed the full range '
-                  'offered by this Accessible Vision Test. The test does '
-                  'not measure smaller letter levels beyond 20/50.',
+                  'offered by this Accessible Vision Test.',
                   style: TextStyle(color: Colors.black54, height: 1.45),
                 ),
               ],
@@ -1555,8 +1604,8 @@ class _AccessibleVisionTestScreenState
 
                 Text(
                   '• If you stopped before 20/50, repeat the screening if '
-                  'positioning, lighting, eye covering or viewing distance '
-                  'may not have been correct.',
+                  'screen calibration, positioning, lighting, eye covering '
+                  'or viewing distance may not have been correct.',
                   style: TextStyle(fontSize: 15, height: 1.45),
                 ),
 
@@ -1593,14 +1642,16 @@ class _AccessibleVisionTestScreenState
             'SCREENING LIMITATIONS',
             const Text(
               'PeekVision provides preliminary browser-based vision '
-              'screening only. This Accessible Vision Test measures '
-              'large-letter levels from 20/400 through 20/50. It does not '
-              'measure smaller levels beyond 20/50. It does not diagnose '
-              'the cause of reduced vision, determine an eyeglass '
-              'prescription, or evaluate eye pressure, retina, optic nerve '
-              'or other clinical findings. Screen dimensions, display '
-              'scaling, viewing distance, lighting, speech recognition and '
-              'user responses can affect the result.',
+              'screening only. Display calibration and distance-based '
+              'letter sizing improve consistency across phones, tablets '
+              'and computer screens, but browser rendering and user '
+              'calibration are still approximations. This Accessible Vision '
+              'Test measures large-letter levels from 20/400 through 20/50. '
+              'It does not diagnose the cause of reduced vision, determine '
+              'an eyeglass prescription, or evaluate eye pressure, retina, '
+              'optic nerve or other clinical findings. Browser zoom, display '
+              'scaling, calibration accuracy, viewing distance, lighting, '
+              'speech recognition and user responses can affect the result.',
               style: TextStyle(fontSize: 15, height: 1.45),
             ),
           ),

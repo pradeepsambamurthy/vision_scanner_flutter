@@ -2,30 +2,13 @@
 
 import 'dart:math' as math;
 
-enum TestMode {
-  distance,
-  near,
-  both,
-}
+enum TestMode { distance, near, both }
 
-enum Optotype {
-  sloan,
-  tumblingE,
-  landoltC,
-}
+enum Optotype { sloan, tumblingE, landoltC }
 
-enum EyeSide {
-  right,
-  left,
-  both,
-}
+enum EyeSide { right, left, both }
 
-enum VisionCorrection {
-  none,
-  distanceGlasses,
-  readingGlasses,
-  contactLenses,
-}
+enum VisionCorrection { none, distanceGlasses, readingGlasses, contactLenses }
 
 extension VisionCorrectionLabel on VisionCorrection {
   String get label {
@@ -185,18 +168,26 @@ class AcuityResult {
   // ================================================================
 
   String get testDistanceLabel {
-    if (testDistanceCm >= 250) {
-      return 'Approximately 10 ft / 3 m';
-    }
-
-    if (testDistanceCm >= 35 &&
-        testDistanceCm <= 45) {
+    // Near vision stays at approximately 40 cm.
+    if (testDistanceCm >= 35 && testDistanceCm <= 45) {
       return 'Approximately 40 cm / 16 in';
     }
 
-    return '${testDistanceCm.toStringAsFixed(0)} cm';
-  }
+    // For distances of 1 meter or more, show meters and feet.
+    if (testDistanceCm >= 100) {
+      final meters = testDistanceCm / 100.0;
+      final feet = testDistanceCm / 30.48;
 
+      return '${meters.toStringAsFixed(1)} m / '
+          '${feet.toStringAsFixed(1)} ft';
+    }
+
+    // For shorter calibrated distance tests, show cm and inches.
+    final inches = testDistanceCm / 2.54;
+
+    return '${testDistanceCm.toStringAsFixed(0)} cm / '
+        '${inches.toStringAsFixed(1)} in';
+  }
   // ================================================================
   // SCREENING LEVEL
   // ================================================================

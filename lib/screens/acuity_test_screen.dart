@@ -3,7 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../models/vision_models.dart' as vm;
+import '../services/display_calibration_service.dart';
 import '../services/report_service.dart';
+import '../utils/vision_test_profile.dart';
+import '../widgets/display_calibration_dialog.dart';
 
 enum _Eye { right, left, both }
 
@@ -64,6 +67,9 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   bool _leftBelowRange = false;
   bool _bothBelowRange = false;
 
+  // Stores the test distance and device profile for the current test.
+  VisionTestProfile? _testProfile;
+
   @override
   void initState() {
     super.initState();
@@ -76,11 +82,29 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   // BASIC HELPERS
   // ================================================================
 
-  double get _testDistanceCm => _mode == vm.TestMode.distance ? 300 : 40;
+  double get _testDistanceCm {
+    final profile = _testProfile;
 
-  String get _testDistanceText => _mode == vm.TestMode.distance
-      ? 'Approximately 10 ft / 3 m'
-      : 'Approximately 40 cm / 16 in';
+    if (profile != null) {
+      return profile.distanceCm;
+    }
+
+    return _mode == vm.TestMode.near ? 40.0 : 300.0;
+  }
+
+  String get _testDistanceText {
+    final profile = _testProfile;
+
+    if (profile != null) {
+      return profile.distanceLabel;
+    }
+
+    if (_mode == vm.TestMode.near) {
+      return '40 cm / 15.7 in';
+    }
+
+    return 'Calculated after screen calibration';
+  }
 
   void _generateLine() {
     _line = List.generate(
@@ -92,6 +116,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   void _resetForEye() {
     _index = 0;
     _lastPassed = -1;
+
     _generateLine();
   }
 
@@ -107,12 +132,17 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
       _leftBelowRange = false;
       _bothBelowRange = false;
 
+      // Keep the screen calibration, but recalculate the
+      // testing profile when the test starts again.
+      _testProfile = null;
+
       _resetForEye();
     });
   }
 
   String _snellen(double logMAR) {
     final denominator = (20 * math.pow(10, logMAR)).round();
+
     return '20/$denominator';
   }
 
@@ -129,6 +159,45 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   }
 
   // ================================================================
+  // TEST PROFILE / CALIBRATION
+  // ================================================================
+
+  Future<bool> _prepareTestProfile() async {
+    if (!DisplayCalibrationService.instance.isCalibrated) {
+      final calibrated = await showDisplayCalibrationDialog(context);
+
+      if (!calibrated || !mounted) {
+        return false;
+      }
+    }
+
+    final VisionTestProfile profile;
+
+    if (_mode == vm.TestMode.near) {
+      // Near vision remains at 40 cm on phone, tablet and desktop.
+      profile = VisionTestProfile.near(context);
+    } else {
+      // The Standard Distance Test begins at 20/50.
+      // PeekVision calculates the longest appropriate distance
+      // for this calibrated display, up to 3 meters.
+      profile = VisionTestProfile.distance(
+        context: context,
+        largestLogMar: _steps.first,
+      );
+    }
+
+    if (!mounted) {
+      return false;
+    }
+
+    setState(() {
+      _testProfile = profile;
+    });
+
+    return true;
+  }
+
+  // ================================================================
   // HUMAN-READABLE RESULT
   // ================================================================
 
@@ -138,14 +207,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
     }
 
     final d = _denominator(value);
-
-    if (d >= 100) {
-      return 'Significant difficulty seen';
-    }
-
-    if (d >= 60) {
-      return 'Noticeable reduction seen';
-    }
 
     if (d >= 40) {
       return 'Some reduction seen';
@@ -186,16 +247,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
 
     final d = _denominator(value);
 
-    if (d >= 100) {
-      return '$eyeLabel had substantial difficulty reading the letters '
-          'presented during this $type screening.';
-    }
-
-    if (d >= 60) {
-      return '$eyeLabel showed a noticeable reduction in $type visual '
-          'acuity during this screening.';
-    }
-
     if (d >= 40) {
       return '$eyeLabel showed some reduction in $type visual acuity. '
           'Repeating the screening under ideal conditions may be helpful.';
@@ -219,10 +270,9 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
     }
 
     return '$eyeLabel reached a very small letter level during this browser '
-        'screening. Because results at these very small sizes are highly '
-        'affected by physical screen size, display scaling and viewing '
-        'distance, this should not be interpreted as a clinically calibrated '
-        'Snellen measurement.';
+        'screening. Display calibration and the selected viewing distance '
+        'were used to size the letters, but this remains a browser-based '
+        'screening rather than a professionally calibrated clinical chart.';
   }
 
   String _compareEyes() {
@@ -247,6 +297,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
     }
 
     final rightD = _denominator(_resultRight!);
+
     final leftD = _denominator(_resultLeft!);
 
     if ((rightD - leftD).abs() <= 5) {
@@ -277,13 +328,13 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
 
     final d = _denominator(_resultBoth!);
 
-    if (d >= 60) {
-      return 'With both eyes open, a noticeable reduction in $type vision '
-          'was seen during this screening.';
+    if (d >= 40) {
+      return 'With both eyes open, some reduction in $type vision was seen '
+          'during this screening.';
     }
 
     if (d >= 30) {
-      return 'With both eyes open, some reduction in $type vision was seen.';
+      return 'With both eyes open, a mild reduction in $type vision was seen.';
     }
 
     if (d >= 20) {
@@ -292,19 +343,27 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
     }
 
     return 'With both eyes open, very small letters were readable during '
-        'this browser screening. Very small-letter results should be '
-        'interpreted cautiously because display calibration can affect them.';
+        'this browser screening. The calibrated display size and selected '
+        'viewing distance were used, but very small-letter results should '
+        'still be interpreted as screening information rather than a '
+        'clinical measurement.';
   }
 
   // ================================================================
   // LETTER SIZE
   // ================================================================
 
-  double _fontFor(double logMAR, BoxConstraints constraints) {
-    final base =
-        (_mode == vm.TestMode.distance ? 0.095 : 0.080) * constraints.maxWidth;
+  double _fontFor(double logMAR) {
+    final profile = _testProfile;
 
-    return base * math.pow(10, logMAR);
+    if (profile == null) {
+      return 32.0;
+    }
+
+    return DisplayCalibrationService.instance.optotypeHeightPx(
+      logMar: logMAR,
+      distanceCm: profile.distanceCm,
+    );
   }
 
   // ================================================================
@@ -343,7 +402,9 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   }
 
   Future<void> _goReport() async {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     await Navigator.pushNamed(
       context,
@@ -355,7 +416,9 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   Future<void> _autoSaveAndGoToReport() async {
     await _saveResults();
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -372,7 +435,9 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   Future<void> _saveToReport() async {
     await _saveResults();
 
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     ScaffoldMessenger.of(
       context,
@@ -383,19 +448,33 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   // TEST FLOW
   // ================================================================
 
-  void _startRight() {
+  Future<void> _startRight() async {
+    final ready = await _prepareTestProfile();
+
+    if (!ready || !mounted) {
+      return;
+    }
+
     setState(() {
       _stage = _Stage.testingRight;
     });
   }
 
   void _startLeft() {
+    if (_testProfile == null) {
+      return;
+    }
+
     setState(() {
       _stage = _Stage.testingLeft;
     });
   }
 
   void _startBoth() {
+    if (_testProfile == null) {
+      return;
+    }
+
     setState(() {
       _stage = _Stage.testingBoth;
     });
@@ -406,6 +485,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
       setState(() {
         _lastPassed = _index;
         _index++;
+
         _generateLine();
       });
 
@@ -472,6 +552,9 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
 
       _correction = vm.VisionCorrection.none;
 
+      // The new mode needs its own distance profile.
+      _testProfile = null;
+
       _resetForEye();
     });
   }
@@ -515,8 +598,12 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
 
                 Text(
                   _mode == vm.TestMode.distance
-                      ? 'Read progressively smaller letters from approximately 10 ft / 3 m. Each eye is screened separately, followed by both eyes together.'
-                      : 'Read progressively smaller letters from approximately 40 cm / 16 in. Each eye is screened separately, followed by both eyes together.',
+                      ? 'Calibrate your display first. PeekVision will then '
+                            'calculate an appropriate viewing distance for this '
+                            'screen and show progressively smaller letters.'
+                      : 'Calibrate your display first, then keep the screen '
+                            'approximately 40 cm / 16 in from your eyes while '
+                            'reading progressively smaller letters.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
@@ -619,6 +706,18 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
                       style: const TextStyle(color: Colors.black54),
                     ),
 
+                    if (_testProfile != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '${_testProfile!.deviceLabel} • '
+                        '${DisplayCalibrationService.instance.isCalibrated ? 'Display calibrated' : 'Display not calibrated'}',
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 16),
                   ],
 
@@ -639,7 +738,11 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
           mode: _mode,
           title: 'Step 1 of 3 — Right Eye (OD)',
           coverEyeText: 'Cover your LEFT eye. Read using only your RIGHT eye.',
-          buttonText: 'Start Right Eye',
+          buttonText: DisplayCalibrationService.instance.isCalibrated
+              ? 'Start Right Eye'
+              : 'Calibrate & Start Right Eye',
+          distanceText: _testDistanceText,
+          deviceText: _testProfile?.deviceLabel,
           onPressed: _startRight,
         );
 
@@ -652,6 +755,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
           steps: _steps,
           fontFor: _fontFor,
           snellen: _snellen,
+          distanceText: _testDistanceText,
           onPass: _markPass,
           onFail: _markFail,
         );
@@ -662,6 +766,8 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
           title: 'Step 2 of 3 — Left Eye (OS)',
           coverEyeText: 'Cover your RIGHT eye. Read using only your LEFT eye.',
           buttonText: 'Start Left Eye',
+          distanceText: _testDistanceText,
+          deviceText: _testProfile?.deviceLabel,
           onPressed: _startLeft,
         );
 
@@ -674,6 +780,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
           steps: _steps,
           fontFor: _fontFor,
           snellen: _snellen,
+          distanceText: _testDistanceText,
           onPass: _markPass,
           onFail: _markFail,
         );
@@ -684,6 +791,8 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
           title: 'Step 3 of 3 — Both Eyes (OU)',
           coverEyeText: 'Keep BOTH eyes open.',
           buttonText: 'Start Both Eyes',
+          distanceText: _testDistanceText,
+          deviceText: _testProfile?.deviceLabel,
           onPressed: _startBoth,
         );
 
@@ -696,6 +805,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
           steps: _steps,
           fontFor: _fontFor,
           snellen: _snellen,
+          distanceText: _testDistanceText,
           onPass: _markPass,
           onFail: _markFail,
         );
@@ -714,6 +824,8 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
           meaning: _simpleMeaning,
           bothEyesMeaning: _bothEyesMeaning,
           eyeComparison: _compareEyes,
+          testDistance: _testDistanceText,
+          deviceLabel: _testProfile?.deviceLabel ?? 'Unknown device',
           onSave: _saveToReport,
           onRetest: _resetAll,
           onStartOtherMode: () => _switchModeAndReset(
@@ -736,20 +848,27 @@ class _CalibrationPanel extends StatelessWidget {
     required this.title,
     required this.coverEyeText,
     required this.buttonText,
+    required this.distanceText,
     required this.onPressed,
+    this.deviceText,
   });
 
   final vm.TestMode mode;
   final String title;
   final String coverEyeText;
   final String buttonText;
+  final String distanceText;
+  final String? deviceText;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final distance = mode == vm.TestMode.distance
-        ? 'Stay approximately 10 ft / 3 m from the screen.'
-        : 'Keep the screen approximately 40 cm / 16 in from your eyes.';
+    final distanceInstruction = mode == vm.TestMode.distance
+        ? distanceText == 'Calculated after screen calibration'
+              ? 'PeekVision will calculate the testing distance after '
+                    'screen calibration.'
+              : 'Stay $distanceText from the screen.'
+        : 'Keep the screen approximately $distanceText from your eyes.';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 12),
@@ -763,7 +882,18 @@ class _CalibrationPanel extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          Text(distance),
+          Text(
+            distanceInstruction,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+
+          if (deviceText != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              '$deviceText • Display calibrated',
+              style: const TextStyle(color: Colors.black54, fontSize: 13),
+            ),
+          ],
 
           const SizedBox(height: 8),
 
@@ -775,14 +905,19 @@ class _CalibrationPanel extends StatelessWidget {
           const SizedBox(height: 12),
 
           const Text(
-            'You will start with larger letters. If you can read them, progressively smaller letters will be shown. Select “I Can’t Read” when you can no longer clearly read the line.',
+            'You will start with larger letters. If you can read them, '
+            'progressively smaller letters will be shown. Select '
+            '“I Can’t Read” when you can no longer clearly read the line.',
             style: TextStyle(height: 1.4),
           ),
 
           const SizedBox(height: 12),
 
           const Text(
-            'This is a preliminary browser-based screening. Screen size, display scaling, viewing distance and lighting can affect the result.',
+            'This is a preliminary browser-based screening. Display '
+            'calibration improves consistency across devices, but browser '
+            'rendering, viewing distance, lighting and user positioning '
+            'can still affect the result.',
             style: TextStyle(color: Colors.black54, fontSize: 13, height: 1.35),
           ),
 
@@ -808,6 +943,7 @@ class _TestRun extends StatelessWidget {
     required this.steps,
     required this.fontFor,
     required this.snellen,
+    required this.distanceText,
     required this.onPass,
     required this.onFail,
   });
@@ -818,9 +954,11 @@ class _TestRun extends StatelessWidget {
   final String line;
   final List<double> steps;
 
-  final double Function(double, BoxConstraints) fontFor;
+  final double Function(double) fontFor;
 
   final String Function(double) snellen;
+
+  final String distanceText;
 
   final VoidCallback onPass;
   final VoidCallback onFail;
@@ -838,97 +976,130 @@ class _TestRun extends StatelessWidget {
     }
   }
 
+  String get eyeInstruction {
+    switch (eye) {
+      case _Eye.right:
+        return 'Cover your LEFT eye without pressing on it.';
+
+      case _Eye.left:
+        return 'Cover your RIGHT eye without pressing on it.';
+
+      case _Eye.both:
+        return 'Keep BOTH eyes open.';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final current = steps[index];
 
     final isMobile = MediaQuery.of(context).size.width < 600;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    final size = fontFor(current);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Testing $eyeName',
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: isMobile ? 15 : 16,
+          ),
+        ),
+
+        Text(
+          eyeInstruction,
+          style: TextStyle(
+            fontSize: isMobile ? 13 : 14,
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+          ),
+        ),
+
+        const SizedBox(height: 4),
+
+        Text(
+          mode == vm.TestMode.distance
+              ? 'Testing distance: $distanceText'
+              : 'Viewing distance: $distanceText',
+          style: TextStyle(
+            fontSize: isMobile ? 13 : 14,
+            color: Colors.black54,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+
+        SizedBox(height: isMobile ? 6 : 10),
+
+        Expanded(
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: Colors.black12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Center(
+              child: Text(
+                line,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.visible,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: size,
+                  height: 1.0,
+                  letterSpacing: size * 0.10,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          'Line ${index + 1} of ${steps.length}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.black54),
+        ),
+
+        const SizedBox(height: 4),
+
+        Text(
+          'Screening level: ${snellen(current)}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+
+        SizedBox(height: isMobile ? 8 : 12),
+
+        Row(
           children: [
-            Text(
-              'Testing $eyeName',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: isMobile ? 15 : 16,
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: onPass,
+                icon: const Icon(Icons.check),
+                label: const Text('I Can Read'),
               ),
             ),
 
-            SizedBox(height: isMobile ? 6 : 10),
+            const SizedBox(width: 8),
 
             Expanded(
-              child: LayoutBuilder(
-                builder: (context, letterConstraints) {
-                  final calculatedSize = fontFor(current, letterConstraints);
-
-                  final maxMobileSize = letterConstraints.maxHeight * 0.42;
-
-                  final size = isMobile
-                      ? math.min(calculatedSize, maxMobileSize)
-                      : calculatedSize;
-
-                  return Center(
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        line,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        style: TextStyle(
-                          letterSpacing: isMobile ? 6 : 8,
-                          fontWeight: FontWeight.w800,
-                          fontSize: size,
-                        ),
-                      ),
-                    ),
-                  );
-                },
+              child: OutlinedButton.icon(
+                onPressed: onFail,
+                icon: const Icon(Icons.flag),
+                label: const Text('I Can’t Read'),
               ),
             ),
-
-            Text(
-              'Line ${index + 1} of ${steps.length}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.black54),
-            ),
-
-            const SizedBox(height: 4),
-
-            Text(
-              'Screening level: ${snellen(current)}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-
-            SizedBox(height: isMobile ? 8 : 12),
-
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: onPass,
-                    icon: const Icon(Icons.check),
-                    label: const Text('I Can Read'),
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: onFail,
-                    icon: const Icon(Icons.flag),
-                    label: const Text('I Can’t Read'),
-                  ),
-                ),
-              ],
-            ),
           ],
-        );
-      },
+        ),
+      ],
     );
   }
 }
@@ -951,6 +1122,8 @@ class _FinishPanel extends StatelessWidget {
     required this.meaning,
     required this.bothEyesMeaning,
     required this.eyeComparison,
+    required this.testDistance,
+    required this.deviceLabel,
     required this.onSave,
     required this.onRetest,
     required this.onStartOtherMode,
@@ -979,6 +1152,9 @@ class _FinishPanel extends StatelessWidget {
 
   final String Function() bothEyesMeaning;
   final String Function() eyeComparison;
+
+  final String testDistance;
+  final String deviceLabel;
 
   final VoidCallback onSave;
   final VoidCallback onRetest;
@@ -1038,6 +1214,20 @@ class _FinishPanel extends StatelessWidget {
         const Text(
           'Vision screening complete',
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          'Test distance: $testDistance',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+
+        const SizedBox(height: 3),
+
+        Text(
+          '$deviceLabel • Display calibrated',
+          style: const TextStyle(color: Colors.black54, fontSize: 13),
         ),
 
         const SizedBox(height: 12),

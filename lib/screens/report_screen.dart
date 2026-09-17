@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/vision_models.dart' as vm;
+import '../services/display_calibration_service.dart';
 import '../services/report_service.dart';
 
 class ReportBody extends StatelessWidget {
@@ -25,6 +26,33 @@ class ReportBody extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontSize: 16, height: 1.4),
         ),
       );
+    }
+
+    // ================================================================
+    // CALIBRATION / DISTANCE HELPERS
+    // ================================================================
+
+    String calibrationStatus() {
+      if (DisplayCalibrationService.instance.isCalibrated) {
+        return 'Completed';
+      }
+
+      return 'Not available in this session';
+    }
+
+    String testDistanceLabel(
+      vm.AcuityResult? result, {
+      required vm.TestMode mode,
+    }) {
+      if (result != null) {
+        return result.testDistanceLabel;
+      }
+
+      if (mode == vm.TestMode.near) {
+        return 'Approximately 40 cm / 16 in';
+      }
+
+      return 'Not recorded';
     }
 
     // ================================================================
@@ -144,48 +172,49 @@ class ReportBody extends StatelessWidget {
 
       if (d == 16) {
         return '$eyeName was able to read letters smaller than the standard '
-            '20/20 reference level. This suggests strong visual acuity under '
-            'the current screening conditions.';
+            '20/20 reference level under the current screening conditions.';
       }
 
       if (d == 13) {
         return '$eyeName was able to read noticeably smaller letters than the '
-            'standard 20/20 reference level. This suggests very good visual '
-            'acuity under the current screening conditions.';
+            'standard 20/20 reference level under the current screening '
+            'conditions.';
       }
 
       if (d == 10) {
         return '$eyeName was able to read very small letters beyond the '
-            'standard 20/20 reference level. This represents strong screening '
-            'performance, although results at this size are more sensitive to '
-            'screen size, scaling and viewing distance.';
+            'standard 20/20 reference level. Display calibration and the '
+            'recorded viewing distance improve consistency, but results at '
+            'these very small sizes should still be interpreted cautiously.';
       }
 
       if (d == 8) {
-        return '$eyeName reached a very small letter level during this browser '
-            'screening. Because results this small depend strongly on physical '
-            'screen size, display scaling and viewing distance, this should be '
-            'treated as the smallest screening level reached rather than a '
-            'clinically confirmed measurement.';
+        return '$eyeName reached a very small letter level during this '
+            'browser screening. The display was calibrated and letter size '
+            'was calculated from the recorded viewing distance, but this '
+            'remains a browser-based screening rather than a clinically '
+            'confirmed measurement.';
       }
 
       if (d == 6) {
-        return '$eyeName reached an extremely small letter level. This is well '
-            'beyond the standard 20/20 reference, but browser calibration can '
-            'strongly affect results at this size.';
+        return '$eyeName reached an extremely small letter level. This is '
+            'well beyond the standard 20/20 reference. Results at this size '
+            'remain sensitive to calibration accuracy, viewing distance and '
+            'browser rendering.';
       }
 
       if (d == 5) {
         return '$eyeName reached an extremely small letter level during this '
-            'screening. Interpret this cautiously because physical screen size '
-            'and exact viewing distance have a large effect at this level.';
+            'screening. Interpret this cautiously because small errors in '
+            'screen calibration or viewing distance have a greater effect at '
+            'very small letter sizes.';
       }
 
       if (d <= 4) {
         return '$eyeName reached the smallest letter level currently presented '
-            'by PeekVision. This shows very strong performance under the test '
-            'conditions, but it should not be interpreted as a clinically '
-            'confirmed $level measurement without proper display calibration.';
+            'by PeekVision. This represents the smallest screening level '
+            'reached under these test conditions and should not be interpreted '
+            'as a clinically confirmed $level measurement.';
       }
 
       return '$eyeName reached the $level screening level.';
@@ -357,9 +386,10 @@ class ReportBody extends StatelessWidget {
       }
 
       return 'Your $testType screening reached very small letter sizes beyond '
-          'the standard 20/20 reference level. Results at these sizes should '
-          'be interpreted cautiously because screen calibration and viewing '
-          'distance can significantly affect them.';
+          'the standard 20/20 reference level. Display calibration and the '
+          'recorded viewing distance improve consistency, but results at these '
+          'sizes should still be interpreted as browser-based screening '
+          'results rather than clinically confirmed measurements.';
     }
 
     // ================================================================
@@ -692,9 +722,10 @@ class ReportBody extends StatelessWidget {
 
                 infoRow(
                   'Test distance:',
-                  distanceInfo?.testDistanceLabel ??
-                      'Approximately 10 ft / 3 m',
+                  testDistanceLabel(distanceInfo, mode: vm.TestMode.distance),
                 ),
+
+                infoRow('Display calibration:', calibrationStatus()),
 
                 infoRow(
                   'Correction:',
@@ -706,9 +737,11 @@ class ReportBody extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 const Text(
-                  'The test progresses from larger to smaller letters. '
-                  'The result shown for each eye is the smallest line '
-                  'successfully read during this screening.',
+                  'For this screening, letter size was calculated using the '
+                  'display calibration and the recorded viewing distance. '
+                  'The test progresses from larger to smaller letters, and '
+                  'the result shown for each eye is the smallest line '
+                  'successfully read during the screening.',
                   style: TextStyle(color: Colors.black54, height: 1.4),
                 ),
               ],
@@ -802,8 +835,10 @@ class ReportBody extends StatelessWidget {
 
                 infoRow(
                   'Test distance:',
-                  nearInfo?.testDistanceLabel ?? 'Approximately 40 cm / 16 in',
+                  testDistanceLabel(nearInfo, mode: vm.TestMode.near),
                 ),
+
+                infoRow('Display calibration:', calibrationStatus()),
 
                 infoRow(
                   'Correction:',
@@ -815,9 +850,11 @@ class ReportBody extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 const Text(
-                  'The test progresses from larger to smaller letters. '
-                  'The result shown for each eye is the smallest line '
-                  'successfully read during this screening.',
+                  'Near vision is tested at approximately 40 cm / 16 in. '
+                  'Letter size is calculated using the calibrated display '
+                  'scale at that viewing distance. The result shown for each '
+                  'eye is the smallest line successfully read during the '
+                  'screening.',
                   style: TextStyle(color: Colors.black54, height: 1.4),
                 ),
               ],
@@ -916,9 +953,11 @@ class ReportBody extends StatelessWidget {
                 const SizedBox(height: 10),
 
                 const Text(
-                  'Color vision screening can be affected by display color '
-                  'settings, brightness, blue-light filters, True Tone, '
-                  'Night Mode, room lighting and viewing conditions.',
+                  'Color vision screening does not use the distance-acuity '
+                  'letter scaling system. View the plates at a comfortable '
+                  'reading distance. Display color settings, brightness, '
+                  'blue-light filters, True Tone, Night Mode, room lighting '
+                  'and viewing conditions can affect the result.',
                   style: TextStyle(color: Colors.black54, height: 1.4),
                 ),
               ],
@@ -951,6 +990,14 @@ class ReportBody extends StatelessWidget {
               Text(
                 '• If your result is below the standard 20/20 reference, '
                 'repeat the screening under the recommended conditions.',
+                style: TextStyle(height: 1.4),
+              ),
+
+              SizedBox(height: 8),
+
+              Text(
+                '• Make sure screen calibration and viewing distance are '
+                'correct before repeating an acuity screening.',
                 style: TextStyle(height: 1.4),
               ),
 
@@ -1019,14 +1066,17 @@ class ReportBody extends StatelessWidget {
 
         const Text(
           'Important: PeekVision provides preliminary browser-based vision '
-          'screening only. Results are not a diagnosis or prescription and '
-          'do not replace a comprehensive eye examination. Physical screen '
-          'size, display scaling, viewing distance, lighting, device '
-          'settings, speech recognition and user responses can affect the '
-          'results. Very small acuity levels such as 20/10, 20/8, 20/6, '
-          '20/5 and 20/4 represent the smallest screening level reached and '
-          'should not be considered clinically confirmed measurements '
-          'without proper display calibration.',
+          'screening only. Screen calibration and distance-based letter '
+          'sizing improve consistency across phones, tablets, laptops and '
+          'desktop displays, but they do not make a consumer browser display '
+          'equivalent to a professionally calibrated clinical eye chart. '
+          'Calibration accuracy, browser zoom, display scaling, viewing '
+          'distance, lighting, device settings and user responses can affect '
+          'the results. Results are not a diagnosis or prescription and do '
+          'not replace a comprehensive eye examination. Very small acuity '
+          'levels such as 20/10, 20/8, 20/6, 20/5 and 20/4 should be treated '
+          'as the smallest browser-screening level reached rather than as '
+          'clinically confirmed measurements.',
           style: TextStyle(
             color: Color(0xFFA85500),
             fontWeight: FontWeight.w700,
