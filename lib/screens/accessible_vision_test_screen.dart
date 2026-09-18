@@ -870,7 +870,6 @@ class _AccessibleVisionTestScreenState
 
   Widget _buildTest() {
     final current = _steps[_index];
-
     final profile = _testProfile;
 
     if (profile == null) {
@@ -879,18 +878,34 @@ class _AccessibleVisionTestScreenState
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final isMobile = MediaQuery.of(context).size.width < 600;
+
         final fontSize = DisplayCalibrationService.instance.optotypeHeightPx(
           logMar: current,
           distanceCm: profile.distanceCm,
         );
 
+        debugPrint(
+          'Accessible level ${_snellen(current)} '
+          'logMAR=$current '
+          'fontSize=${fontSize.toStringAsFixed(2)}',
+        );
+
+        // The letter area must be tall enough for very large Accessible
+        // optotypes. On mobile the whole test can then scroll vertically.
+        final calculatedLetterHeight = fontSize * 1.8;
+
+        final letterBoxHeight = calculatedLetterHeight < 220.0
+            ? 220.0
+            : calculatedLetterHeight;
+
         return Container(
           width: double.infinity,
           height: double.infinity,
           color: Colors.white,
-          padding: const EdgeInsets.all(18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(isMobile ? 12 : 18),
             children: [
               Row(
                 children: [
@@ -901,8 +916,8 @@ class _AccessibleVisionTestScreenState
                   Expanded(
                     child: Text(
                       'Testing $_eyeTitle',
-                      style: const TextStyle(
-                        fontSize: 22,
+                      style: TextStyle(
+                        fontSize: isMobile ? 18 : 22,
                         fontWeight: FontWeight.w900,
                         color: Colors.black,
                       ),
@@ -922,8 +937,8 @@ class _AccessibleVisionTestScreenState
 
               Text(
                 _eyeInstruction,
-                style: const TextStyle(
-                  fontSize: 19,
+                style: TextStyle(
+                  fontSize: isMobile ? 16 : 19,
                   fontWeight: FontWeight.w700,
                   color: Colors.black,
                 ),
@@ -933,8 +948,8 @@ class _AccessibleVisionTestScreenState
 
               Text(
                 'Testing distance: ${profile.distanceLabel}',
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: isMobile ? 14 : 16,
                   fontWeight: FontWeight.w700,
                   color: Colors.black87,
                 ),
@@ -949,7 +964,8 @@ class _AccessibleVisionTestScreenState
 
               const SizedBox(height: 12),
 
-              Expanded(
+              SizedBox(
+                height: letterBoxHeight,
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
@@ -964,6 +980,7 @@ class _AccessibleVisionTestScreenState
                   child: Center(
                     child: Text(
                       _line,
+                      key: ValueKey('accessible-line-$_index'),
                       maxLines: 1,
                       softWrap: false,
                       overflow: TextOverflow.visible,
@@ -1086,6 +1103,8 @@ class _AccessibleVisionTestScreenState
                   ),
                 ],
               ),
+
+              const SizedBox(height: 24),
             ],
           ),
         );

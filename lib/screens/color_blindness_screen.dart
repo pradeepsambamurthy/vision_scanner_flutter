@@ -78,27 +78,27 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
   }
 
   String _resultTitle({required int correct, required int total}) {
-  if (correct >= total - 1) {
-    return 'Responses were generally consistent with the expected plate answers.';
-  }
+    if (correct >= total - 1) {
+      return 'Responses were generally consistent with the expected plate answers.';
+    }
 
-  if (correct >= (total * 0.70).round()) {
-    return 'Some responses differed from the expected plate answers.';
-  }
+    if (correct >= (total * 0.70).round()) {
+      return 'Some responses differed from the expected plate answers.';
+    }
 
-  return 'Several responses differed from the expected plate answers.';
+    return 'Several responses differed from the expected plate answers.';
   }
 
   String _resultExplanation({required int correct, required int total}) {
-  if (correct >= total - 1) {
-    return 'Most of your responses matched the expected answers for these Ishihara-style screening plates. This result is for preliminary screening only.';
-  }
+    if (correct >= total - 1) {
+      return 'Most of your responses matched the expected answers for these Ishihara-style screening plates. This result is for preliminary screening only.';
+    }
 
-  if (correct >= (total * 0.70).round()) {
-    return 'Some responses did not match the expected answers. Screen brightness, display color settings, lighting, viewing distance, and device calibration can affect the result. Consider repeating the screening under recommended conditions.';
-  }
+    if (correct >= (total * 0.70).round()) {
+      return 'Some responses did not match the expected answers. Screen brightness, display color settings, lighting, viewing distance, and device calibration can affect the result. Consider repeating the screening under recommended conditions.';
+    }
 
-  return 'Several responses did not match the expected answers. This does not diagnose a color vision condition. Consider discussing the result with an optometrist or ophthalmologist, especially if you have concerns about color perception.';
+    return 'Several responses did not match the expected answers. This does not diagnose a color vision condition. Consider discussing the result with an optometrist or ophthalmologist, especially if you have concerns about color perception.';
   }
 
   String _missedPlateSummary() {
@@ -215,7 +215,6 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
     }
   }
 
-
   // ---------- UI helpers ----------
   Widget _glassModal({required Widget child}) {
     return ClipRRect(
@@ -302,23 +301,22 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
   }
 
   Widget _footerBar() {
-  return SizedBox(
-    width: double.infinity,
-    child: FilledButton.icon(
-      onPressed: onCheckPressed,
-      icon: const Icon(Icons.check),
-      label: Text(
-        index == plates.length - 1 ? 'Finish' : 'Check',
-      ),
-      style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: onCheckPressed,
+        icon: const Icon(Icons.check),
+        label: Text(index == plates.length - 1 ? 'Finish' : 'Check'),
+        style: FilledButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentExpectedAnswer = expectedAnswers[index];
@@ -340,108 +338,111 @@ class _ColorBlindnessScreenState extends State<ColorBlindnessScreen> {
                         (c.maxHeight - topBlock - bottomBlock).clamp(220, 520);
 
                     return SingleChildScrollView(
+                      primary: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 24),
                       child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Center(
-                          child: Text(
-                            'Free Online Color Vision Screening',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 18,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                        'Use Ishihara-style plates for a preliminary online color vision screening for possible red-green color vision differences. Results can be affected by screen brightness, display color settings, calibration, lighting, and viewing conditions.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          height: 1.35,
-                       ),
-                     ),
-
-                     const SizedBox(height: 12),
-
-                        _instructionsDropdown(),
-                        const SizedBox(height: 10),
-
-                        Center(
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: SizedBox(
-                              width: available,
-                              height: available,
-                              child: Image.asset(
-                                currentPlate,
-                                fit: BoxFit.contain,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Center(
+                            child: Text(
+                              'Free Online Color Vision Screening',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 18,
+                                color: Colors.black87,
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
+                          const SizedBox(height: 10),
+                          const Text(
+                            'Use Ishihara-style plates for a preliminary online color vision screening for possible red-green color vision differences. Results can be affected by screen brightness, display color settings, calibration, lighting, and viewing conditions.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              height: 1.35,
+                            ),
+                          ),
 
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Plate ${index + 1} of ${plates.length}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: Colors.black87,
+                          const SizedBox(height: 12),
+
+                          _instructionsDropdown(),
+                          const SizedBox(height: 10),
+
+                          Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: SizedBox(
+                                width: available,
+                                height: available,
+                                child: Image.asset(
+                                  currentPlate,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
                             ),
-                            Text(
-                              'Completed: ${userAnswers.length} / ${plates.length}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black54,
+                          ),
+                          const SizedBox(height: 8),
+
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  'Plate ${index + 1} of ${plates.length}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black87,
+                                  ),
+                                ),
                               ),
+                              Text(
+                                'Completed: ${userAnswers.length} / ${plates.length}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+
+                          Text(
+                            'What number do you see? (Type "Nothing" if none)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black.withOpacity(0.85),
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-
-                        Text(
-                          'What number do you see? (Type "Nothing" if none)',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: Colors.black.withOpacity(0.85),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _answer,
-                          decoration: const InputDecoration(
-                            hintText: 'Example: 12  or  Nothing',
-                            border: OutlineInputBorder(),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _answer,
+                            decoration: const InputDecoration(
+                              hintText: 'Example: 12  or  Nothing',
+                              border: OutlineInputBorder(),
+                            ),
+                            onSubmitted: (_) => onCheckPressed(),
                           ),
-                          onSubmitted: (_) => onCheckPressed(),
-                        ),
 
-                        /*
+                          /*
                           Developer note:
                           This is hidden from the user UI. It only keeps the variable
                           referenced so you can easily debug expected answer mapping.
                         */
-                        Offstage(
-                          offstage: true,
-                          child: Text('Expected: $currentExpectedAnswer'),
-                        ),
+                          Offstage(
+                            offstage: true,
+                            child: Text('Expected: $currentExpectedAnswer'),
+                          ),
 
-                        const SizedBox(height: 12),
-                        _footerBar(),
-                      ],
-                     ),
+                          const SizedBox(height: 12),
+                          _footerBar(),
+                        ],
+                      ),
                     );
                   },
                 ),
