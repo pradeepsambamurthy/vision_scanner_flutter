@@ -1069,6 +1069,7 @@ class _TestRun extends StatelessWidget {
             child: Center(
               child: Text(
                 line,
+                textScaler: TextScaler.noScaling,
                 maxLines: 1,
                 softWrap: false,
                 overflow: TextOverflow.visible,

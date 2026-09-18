@@ -885,12 +885,6 @@ class _AccessibleVisionTestScreenState
           distanceCm: profile.distanceCm,
         );
 
-        debugPrint(
-          'Accessible level ${_snellen(current)} '
-          'logMAR=$current '
-          'fontSize=${fontSize.toStringAsFixed(2)}',
-        );
-
         // The letter area must be tall enough for very large Accessible
         // optotypes. On mobile the whole test can then scroll vertically.
         final calculatedLetterHeight = fontSize * 1.8;
@@ -981,6 +975,7 @@ class _AccessibleVisionTestScreenState
                     child: Text(
                       _line,
                       key: ValueKey('accessible-line-$_index'),
+                      textScaler: TextScaler.noScaling,
                       maxLines: 1,
                       softWrap: false,
                       overflow: TextOverflow.visible,
