@@ -100,7 +100,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
     }
 
     if (_mode == vm.TestMode.near) {
-      return '40 cm / 15.7 in';
+      return '40 cm / 16 in';
     }
 
     return 'Calculated after screen calibration';
@@ -842,7 +842,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
 // PRE-TEST PANEL
 // ================================================================
 
-class _CalibrationPanel extends StatelessWidget {
+class _CalibrationPanel extends StatefulWidget {
   const _CalibrationPanel({
     required this.mode,
     required this.title,
@@ -862,21 +862,38 @@ class _CalibrationPanel extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
+  State<_CalibrationPanel> createState() => _CalibrationPanelState();
+}
+
+class _CalibrationPanelState extends State<_CalibrationPanel> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final distanceInstruction = mode == vm.TestMode.distance
-        ? distanceText == 'Calculated after screen calibration'
+    final distanceInstruction = widget.mode == vm.TestMode.distance
+        ? widget.distanceText == 'Calculated after screen calibration'
               ? 'PeekVision will calculate the testing distance after '
                     'screen calibration.'
-              : 'Stay $distanceText from the screen.'
-        : 'Keep the screen approximately $distanceText from your eyes.';
+              : 'Stay ${widget.distanceText} from the screen.'
+        : 'Keep the screen approximately '
+              '${widget.distanceText} from your eyes.';
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scrollbar(
+      controller: _scrollController,
+      thumbVisibility: true,
+      child: ListView(
+        controller: _scrollController,
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(0, 0, 8, 32),
         children: [
           Text(
-            title,
+            widget.title,
             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
           ),
 
@@ -887,10 +904,10 @@ class _CalibrationPanel extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
 
-          if (deviceText != null) ...[
+          if (widget.deviceText != null) ...[
             const SizedBox(height: 4),
             Text(
-              '$deviceText • Display calibrated',
+              '${widget.deviceText} • Display calibrated',
               style: const TextStyle(color: Colors.black54, fontSize: 13),
             ),
           ],
@@ -898,7 +915,7 @@ class _CalibrationPanel extends StatelessWidget {
           const SizedBox(height: 8),
 
           Text(
-            coverEyeText,
+            widget.coverEyeText,
             style: const TextStyle(fontWeight: FontWeight.w700),
           ),
 
@@ -923,7 +940,15 @@ class _CalibrationPanel extends StatelessWidget {
 
           const SizedBox(height: 18),
 
-          FilledButton(onPressed: onPressed, child: Text(buttonText)),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: widget.onPressed,
+              child: Text(widget.buttonText),
+            ),
+          ),
+
+          const SizedBox(height: 24),
         ],
       ),
     );
