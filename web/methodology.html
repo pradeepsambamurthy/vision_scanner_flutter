@@ -252,8 +252,8 @@
     <p>
       Visual acuity describes the ability to resolve fine visual detail.
       PeekVision presents progressively smaller letter optotypes and records
-      the smallest level that the user reports being able to read.
-      <a href="/visual-acuity-test.html">visual acuity screening</a>
+      the smallest level that the user reports being able to read during the
+      <a href="/visual-acuity-test.html">visual acuity screening</a>.
     </p>
 
     <p>
@@ -501,16 +501,26 @@
       physical size of letters shown on screen.
     </p>
 
-    <div class="warning">
+    <div class="note">
       PeekVision currently provides a browser-based screening estimate and
       should not be considered equivalent to a calibrated clinical visual
       acuity chart.
     </div>
 
     <p>
-      Future versions may incorporate additional physical screen calibration
-      methods to improve consistency across devices.
-    </p>
+      PeekVision includes a display calibration step that uses a physical
+      reference object to estimate the relationship between screen pixels
+      and physical size. The application then calculates an appropriate
+      viewing distance for the available display area.
+   </p>
+
+   <div class="warning">
+     Browser-based calibration can improve consistency across devices,
+     but results may still be affected by browser zoom, operating-system
+     scaling, display characteristics, and the user's ability to maintain
+     the instructed viewing distance.
+   </div>
+    
   </section>
 
   <section>
