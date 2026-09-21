@@ -972,26 +972,27 @@ class _AccessibleVisionTestScreenState
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Center(
-                    child: Text(
-                      _line,
-                      key: ValueKey('accessible-line-$_index'),
-                      textScaler: TextScaler.noScaling,
-                      maxLines: 1,
-                      softWrap: false,
-                      overflow: TextOverflow.visible,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        height: 1.0,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: fontSize * 0.10,
-                        color: Colors.black,
+                    child: ExcludeSemantics( 
+                      child: Text(
+                        _line,
+                        key: ValueKey('accessible-line-$_index'),
+                        textScaler: TextScaler.noScaling,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.visible,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          height: 1.0,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: fontSize * 0.10,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
 
               Text(
