@@ -972,7 +972,7 @@ class _AccessibleVisionTestScreenState
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Center(
-                    child: ExcludeSemantics( 
+                    child: ExcludeSemantics(
                       child: Text(
                         _line,
                         key: ValueKey('accessible-line-$_index'),

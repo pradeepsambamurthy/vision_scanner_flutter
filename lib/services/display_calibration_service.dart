@@ -82,7 +82,10 @@ class DisplayCalibrationService {
 
     final rowFactor = lettersPerLine + ((lettersPerLine - 1) * spacingFraction);
 
-    final maximumLetterHeightMm = availableWidthMm / rowFactor;
+    const fontCompensation = 1.35;
+
+    final maximumLetterHeightMm =
+        availableWidthMm / rowFactor / fontCompensation;
 
     final acuityScale = math.pow(10.0, largestLogMar).toDouble();
 
