@@ -67,7 +67,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   bool _leftBelowRange = false;
   bool _bothBelowRange = false;
 
-  // Stores the test distance and device profile for the current test.
   VisionTestProfile? _testProfile;
 
   @override
@@ -116,7 +115,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
   void _resetForEye() {
     _index = 0;
     _lastPassed = -1;
-
     _generateLine();
   }
 
@@ -142,7 +140,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
 
   String _snellen(double logMAR) {
     final denominator = (20 * math.pow(10, logMAR)).round();
-
     return '20/$denominator';
   }
 
@@ -174,12 +171,8 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
     final VisionTestProfile profile;
 
     if (_mode == vm.TestMode.near) {
-      // Near vision remains at 40 cm on phone, tablet and desktop.
       profile = VisionTestProfile.near(context);
     } else {
-      // The Standard Distance Test begins at 20/50.
-      // PeekVision calculates the longest appropriate distance
-      // for this calibrated display, up to 3 meters.
       profile = VisionTestProfile.distance(
         context: context,
         largestLogMar: _steps.first,
@@ -297,7 +290,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
     }
 
     final rightD = _denominator(_resultRight!);
-
     final leftD = _denominator(_resultLeft!);
 
     if ((rightD - leftD).abs() <= 5) {
@@ -485,7 +477,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
       setState(() {
         _lastPassed = _index;
         _index++;
-
         _generateLine();
       });
 
@@ -493,7 +484,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
     }
 
     _lastPassed = _index;
-
     _finishCurrentEye(belowRange: false);
   }
 
@@ -512,21 +502,18 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
         _rightBelowRange = belowRange;
 
         _stage = _Stage.idleLeft;
-
         _resetForEye();
       } else if (_stage == _Stage.testingLeft) {
         _resultLeft = result;
         _leftBelowRange = belowRange;
 
         _stage = _Stage.idleBoth;
-
         _resetForEye();
       } else if (_stage == _Stage.testingBoth) {
         _resultBoth = result;
         _bothBelowRange = belowRange;
 
         _stage = _Stage.finished;
-
         finishedAll = true;
       }
     });
@@ -552,7 +539,6 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
 
       _correction = vm.VisionCorrection.none;
 
-      // The new mode needs its own distance profile.
       _testProfile = null;
 
       _resetForEye();
@@ -576,6 +562,11 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
         _stage == _Stage.testingLeft ||
         _stage == _Stage.testingBoth;
 
+    final isPreTest =
+        _stage == _Stage.idleRight ||
+        _stage == _Stage.idleLeft ||
+        _stage == _Stage.idleBoth;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -593,9 +584,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
                     fontSize: 22,
                   ),
                 ),
-
                 const SizedBox(height: 6),
-
                 Text(
                   _mode == vm.TestMode.distance
                       ? 'Calibrate your display first. PeekVision will then '
@@ -621,109 +610,110 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
             elevation: 0,
             child: Padding(
               padding: EdgeInsets.all(isMobile ? 12 : 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (!(isMobile && isActivelyTesting)) ...[
-                    Row(
+              child: isPreTest
+                  ? ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 24),
                       children: [
-                        const Text(
-                          'Test:',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: DropdownButtonFormField<vm.TestMode>(
-                            initialValue: _mode,
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              border: OutlineInputBorder(),
+                        Row(
+                          children: [
+                            const Text(
+                              'Test:',
+                              style: TextStyle(fontWeight: FontWeight.w700),
                             ),
-                            items: const [
-                              DropdownMenuItem(
-                                value: vm.TestMode.distance,
-                                child: Text('Distance vision'),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: DropdownButtonFormField<vm.TestMode>(
+                                initialValue: _mode,
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  border: OutlineInputBorder(),
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: vm.TestMode.distance,
+                                    child: Text('Distance vision'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: vm.TestMode.near,
+                                    child: Text('Near / reading vision'),
+                                  ),
+                                ],
+                                onChanged: (mode) {
+                                  if (mode != null && mode != _mode) {
+                                    _switchModeAndReset(mode);
+                                  }
+                                },
                               ),
-                              DropdownMenuItem(
-                                value: vm.TestMode.near,
-                                child: Text('Near / reading vision'),
-                              ),
-                            ],
-                            onChanged: (mode) {
-                              if (mode != null && mode != _mode) {
-                                _switchModeAndReset(mode);
-                              }
-                            },
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        DropdownButtonFormField<vm.VisionCorrection>(
+                          initialValue: _correction,
+                          decoration: const InputDecoration(
+                            labelText:
+                                'Vision correction used during this test',
+                            border: OutlineInputBorder(),
+                            helperText:
+                                'Choose what you are wearing right now.',
                           ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: vm.VisionCorrection.none,
+                              child: Text('No glasses or contacts'),
+                            ),
+                            DropdownMenuItem(
+                              value: vm.VisionCorrection.distanceGlasses,
+                              child: Text('Distance glasses'),
+                            ),
+                            DropdownMenuItem(
+                              value: vm.VisionCorrection.readingGlasses,
+                              child: Text('Reading glasses'),
+                            ),
+                            DropdownMenuItem(
+                              value: vm.VisionCorrection.contactLenses,
+                              child: Text('Contact lenses'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value == null) {
+                              return;
+                            }
+
+                            setState(() {
+                              _correction = value;
+                            });
+                          },
                         ),
+
+                        const SizedBox(height: 8),
+
+                        Text(
+                          'Test distance: $_testDistanceText',
+                          style: const TextStyle(color: Colors.black54),
+                        ),
+
+                        if (_testProfile != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '${_testProfile!.deviceLabel} • '
+                            '${DisplayCalibrationService.instance.isCalibrated ? 'Display calibrated' : 'Display not calibrated'}',
+                            style: const TextStyle(
+                              color: Colors.black54,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+
+                        const SizedBox(height: 16),
+
+                        _buildStage(),
                       ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    DropdownButtonFormField<vm.VisionCorrection>(
-                      initialValue: _correction,
-                      decoration: const InputDecoration(
-                        labelText: 'Vision correction used during this test',
-                        border: OutlineInputBorder(),
-                        helperText: 'Choose what you are wearing right now.',
-                      ),
-                      items: const [
-                        DropdownMenuItem(
-                          value: vm.VisionCorrection.none,
-                          child: Text('No glasses or contacts'),
-                        ),
-                        DropdownMenuItem(
-                          value: vm.VisionCorrection.distanceGlasses,
-                          child: Text('Distance glasses'),
-                        ),
-                        DropdownMenuItem(
-                          value: vm.VisionCorrection.readingGlasses,
-                          child: Text('Reading glasses'),
-                        ),
-                        DropdownMenuItem(
-                          value: vm.VisionCorrection.contactLenses,
-                          child: Text('Contact lenses'),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-
-                        setState(() {
-                          _correction = value;
-                        });
-                      },
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Text(
-                      'Test distance: $_testDistanceText',
-                      style: const TextStyle(color: Colors.black54),
-                    ),
-
-                    if (_testProfile != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        '${_testProfile!.deviceLabel} • '
-                        '${DisplayCalibrationService.instance.isCalibrated ? 'Display calibrated' : 'Display not calibrated'}',
-                        style: const TextStyle(
-                          color: Colors.black54,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-
-                    const SizedBox(height: 16),
-                  ],
-
-                  Expanded(child: _buildStage()),
-                ],
-              ),
+                    )
+                  : _buildStage(),
             ),
           ),
         ),
@@ -842,7 +832,7 @@ class _AcuityTestScreenState extends State<AcuityTestScreen> {
 // PRE-TEST PANEL
 // ================================================================
 
-class _CalibrationPanel extends StatefulWidget {
+class _CalibrationPanel extends StatelessWidget {
   const _CalibrationPanel({
     required this.mode,
     required this.title,
@@ -862,95 +852,70 @@ class _CalibrationPanel extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  State<_CalibrationPanel> createState() => _CalibrationPanelState();
-}
-
-class _CalibrationPanelState extends State<_CalibrationPanel> {
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final distanceInstruction = widget.mode == vm.TestMode.distance
-        ? widget.distanceText == 'Calculated after screen calibration'
+    final distanceInstruction = mode == vm.TestMode.distance
+        ? distanceText == 'Calculated after screen calibration'
               ? 'PeekVision will calculate the testing distance after '
                     'screen calibration.'
-              : 'Stay ${widget.distanceText} from the screen.'
+              : 'Stay $distanceText from the screen.'
         : 'Keep the screen approximately '
-              '${widget.distanceText} from your eyes.';
+              '$distanceText from your eyes.';
 
-    return Scrollbar(
-      controller: _scrollController,
-      thumbVisibility: true,
-      child: ListView(
-        controller: _scrollController,
-        physics: const ClampingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(0, 0, 8, 32),
-        children: [
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+        ),
+
+        const SizedBox(height: 12),
+
+        Text(
+          distanceInstruction,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+
+        if (deviceText != null) ...[
+          const SizedBox(height: 4),
           Text(
-            widget.title,
-            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+            '$deviceText • Display calibrated',
+            style: const TextStyle(color: Colors.black54, fontSize: 13),
           ),
-
-          const SizedBox(height: 12),
-
-          Text(
-            distanceInstruction,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-
-          if (widget.deviceText != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              '${widget.deviceText} • Display calibrated',
-              style: const TextStyle(color: Colors.black54, fontSize: 13),
-            ),
-          ],
-
-          const SizedBox(height: 8),
-
-          Text(
-            widget.coverEyeText,
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-
-          const SizedBox(height: 12),
-
-          const Text(
-            'You will start with larger letters. If you can read them, '
-            'progressively smaller letters will be shown. Select '
-            '“I Can’t Read” when you can no longer clearly read the line.',
-            style: TextStyle(height: 1.4),
-          ),
-
-          const SizedBox(height: 12),
-
-          const Text(
-            'This is a preliminary browser-based screening. Display '
-            'calibration improves consistency across devices, but browser '
-            'rendering, viewing distance, lighting and user positioning '
-            'can still affect the result.',
-            style: TextStyle(color: Colors.black54, fontSize: 13, height: 1.35),
-          ),
-
-          const SizedBox(height: 18),
-
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: widget.onPressed,
-              child: Text(widget.buttonText),
-            ),
-          ),
-
-          const SizedBox(height: 24),
         ],
-      ),
+
+        const SizedBox(height: 8),
+
+        Text(coverEyeText, style: const TextStyle(fontWeight: FontWeight.w700)),
+
+        const SizedBox(height: 12),
+
+        const Text(
+          'You will start with larger letters. If you can read them, '
+          'progressively smaller letters will be shown. Select '
+          '“I Can’t Read” when you can no longer clearly read the line.',
+          style: TextStyle(height: 1.4),
+        ),
+
+        const SizedBox(height: 12),
+
+        const Text(
+          'This is a preliminary browser-based screening. Display '
+          'calibration improves consistency across devices, but browser '
+          'rendering, viewing distance, lighting and user positioning '
+          'can still affect the result.',
+          style: TextStyle(color: Colors.black54, fontSize: 13, height: 1.35),
+        ),
+
+        const SizedBox(height: 18),
+
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(onPressed: onPressed, child: Text(buttonText)),
+        ),
+
+        const SizedBox(height: 24),
+      ],
     );
   }
 }
@@ -980,7 +945,6 @@ class _TestRun extends StatelessWidget {
   final List<double> steps;
 
   final double Function(double) fontFor;
-
   final String Function(double) snellen;
 
   final String distanceText;
@@ -992,10 +956,8 @@ class _TestRun extends StatelessWidget {
     switch (eye) {
       case _Eye.right:
         return 'RIGHT eye (OD)';
-
       case _Eye.left:
         return 'LEFT eye (OS)';
-
       case _Eye.both:
         return 'BOTH eyes (OU)';
     }
@@ -1005,10 +967,8 @@ class _TestRun extends StatelessWidget {
     switch (eye) {
       case _Eye.right:
         return 'Cover your LEFT eye without pressing on it.';
-
       case _Eye.left:
         return 'Cover your RIGHT eye without pressing on it.';
-
       case _Eye.both:
         return 'Keep BOTH eyes open.';
     }
@@ -1017,9 +977,7 @@ class _TestRun extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final current = steps[index];
-
     final isMobile = MediaQuery.of(context).size.width < 600;
-
     final size = fontFor(current);
 
     return Column(
@@ -1226,7 +1184,8 @@ class _FinishPanel extends StatelessWidget {
               const SizedBox(height: 8),
 
               Text(
-                'Screening level: ${screeningLevel(value, belowRange: belowRange)}',
+                'Screening level: '
+                '${screeningLevel(value, belowRange: belowRange)}',
                 style: const TextStyle(color: Colors.black54),
               ),
             ],
@@ -1236,6 +1195,8 @@ class _FinishPanel extends StatelessWidget {
     }
 
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.only(bottom: 24),
       children: [
         const Text(
           'Vision screening complete',
